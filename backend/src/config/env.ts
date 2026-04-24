@@ -13,6 +13,8 @@ const envSchema = z.object({
 
   MOBILE_APP_URL: z.string().url(),
   ADMIN_DASHBOARD_URL: z.string().url(),
+
+  RESET_PASSWORD_REDIRECT_URL: z.string().default('myapp://reset-password'),
 });
 
 export const env = envSchema.parse(process.env);

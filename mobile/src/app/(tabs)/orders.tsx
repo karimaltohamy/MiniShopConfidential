@@ -45,94 +45,61 @@ export default function OrdersScreen() {
     </View>
   );
 
-  const renderStatsCard = () => (
-    <View style={styles.statsRow}>
-      <View style={[styles.statCard, { backgroundColor: (colors.primary as any)[50] }]}>
-        <View style={[styles.statIconWrapper, { backgroundColor: (colors.primary as any)[100] }]}>
-          <Package size={24} color={colors.primary[600]} />
-        </View>
-        <Text style={styles.statValue}>{orderStats.total}</Text>
-        <Text style={styles.statLabel}>Total Orders</Text>
-      </View>
-      <View style={[styles.statCard, { backgroundColor: (colors.success as any)[50] }]}>
-        <View style={[styles.statIconWrapper, { backgroundColor: (colors.success as any)[100] }]}>
-          <Package size={24} color={colors.success[600]} />
-        </View>
-        <Text style={[styles.statValue, { color: colors.success[700] }]}>{orderStats.completed}</Text>
-        <Text style={styles.statLabel}>Completed</Text>
-      </View>
-      <View style={[styles.statCard, { backgroundColor: (colors.warning as any)[50] }]}>
-        <View style={[styles.statIconWrapper, { backgroundColor: (colors.warning as any)[100] }]}>
-          <Calendar size={24} color={colors.warning[600]} />
-        </View>
-        <Text style={[styles.statValue, { color: colors.warning[700] }]}>{orderStats.pending + orderStats.processing}</Text>
-        <Text style={styles.statLabel}>In Progress</Text>
-      </View>
-      <View style={[styles.statCard, { backgroundColor: colors.gray[50] }]}>
-        <View style={[styles.statIconWrapper, { backgroundColor: colors.gray[200] }]}>
-          <Filter size={24} color={colors.gray[500]} />
-        </View>
-        <Text style={[styles.statValue, { color: colors.gray[700] }]}>{orderStats.cancelled}</Text>
-        <Text style={styles.statLabel}>Cancelled</Text>
-      </View>
-    </View>
-  );
 
-   if (isLoading) {
-      return (
-        <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-          <CustomHeader title="Orders" showBack={false} />
-          {renderSkeleton()}
-        </SafeAreaView>
-      );
-    }
 
-   if (!orders || orders.length === 0) {
-      return (
-        <View style={styles.container}>
-         <CustomHeader title="Orders" showBack={false} />
-         <EmptyState
-           icon={Package}
-           title="No orders yet"
-           description="Your order history will appear here"
-         />
-       </View>
-     );
-   }
-
-   return (
+  if (isLoading) {
+    return (
       <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-       <CustomHeader title="Orders" showBack={false} />
-       <FlatList
-         data={orders}
-         renderItem={({ item }: { item: Order }) => (
-           <OrderCard
-             id={item.id}
-             status={item.status}
-             total_amount={item.total_amount}
-             created_at={item.created_at}
-             items={item.order_items}
-             onPress={() => {
-               // Navigate to order detail if implemented
-             }}
-           />
-         )}
-         keyExtractor={(item) => item.id}
-         contentContainerStyle={styles.list}
-         ListHeaderComponent={renderStatsCard}
-         ListHeaderComponentStyle={styles.listHeader}
-         refreshControl={
-           <RefreshControl
-             refreshing={isRefetching}
-             onRefresh={refetch}
-             tintColor={colors.primary[500]}
-             colors={[colors.primary[500]]}
-           />
-         }
-        />
+        <CustomHeader title="Orders" showBack={false} />
+        {renderSkeleton()}
       </SafeAreaView>
     );
   }
+
+  if (!orders || orders.length === 0) {
+    return (
+      <View style={styles.container}>
+        <CustomHeader title="Orders" showBack={false} />
+        <EmptyState
+          icon={Package}
+          title="No orders yet"
+          description="Your order history will appear here"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader title="Orders" showBack={false} />
+      <FlatList
+        data={orders}
+        renderItem={({ item }: { item: Order }) => (
+          <OrderCard
+            id={item.id}
+            status={item.status}
+            total_amount={item.total_amount}
+            created_at={item.created_at}
+            items={item.order_items}
+            onPress={() => {
+              // Navigate to order detail if implemented
+            }}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            tintColor={colors.primary[500]}
+            colors={[colors.primary[500]]}
+          />
+        }
+      />
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {

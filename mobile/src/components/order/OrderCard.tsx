@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+} from 'react-native';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { ChevronRight } from 'lucide-react-native';
@@ -50,6 +56,7 @@ export function OrderCard({
   onPress,
 }: OrderCardProps) {
   const date = new Date(created_at);
+
   const formattedDate = date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -63,17 +70,37 @@ export function OrderCard({
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  const formattedPrice = new Intl.NumberFormat('en-EG', {
+    style: 'currency',
+    currency: 'EGP',
+  }).format(total_amount);
+
   return (
-    <Card onPress={onPress} style={styles.card}>
-      {/* Header with Order ID, Status, and Date */}
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.card,
+        { transform: [{ scale: pressed ? 0.98 : 1 }] },
+      ]}
+    >
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.orderIdRow}>
-            <View style={[styles.statusDot, { backgroundColor: statusDotColors[status] }]} />
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: statusDotColors[status] },
+              ]}
+            />
             <Text style={styles.orderId}>Order #{id.slice(0, 8)}</Text>
           </View>
-          <Text style={styles.dateTime}>{formattedDate} at {formattedTime}</Text>
+
+          <Text style={styles.dateTime}>
+            {formattedDate} • {formattedTime}
+          </Text>
         </View>
+
         <Badge variant={statusVariants[status]} style={styles.badge}>
           {statusLabels[status]}
         </Badge>
@@ -83,52 +110,59 @@ export function OrderCard({
       <View style={styles.itemsContainer}>
         <View style={styles.itemsRow}>
           {items.slice(0, 3).map((item, index) => (
-            <View key={index} style={styles.itemPreview}>
-              <View style={[styles.itemImageWrapper, shadows.xs]}>
-                <Image
-                  source={{
-                    uri: item.products.image_url || 'https://via.placeholder.com/60/9CA3AF/FFFFFF?text=No+Image',
-                  }}
-                  style={styles.itemImage}
-                  defaultSource={{ uri: 'https://via.placeholder.com/60/9CA3AF/FFFFFF?text=No+Image' }}
-                />
-              </View>
+            <View
+              key={index}
+              style={[
+                styles.itemImageWrapper,
+                index === 0 && { marginLeft: 0 },
+              ]}
+            >
+              <Image
+                source={{
+                  uri:
+                    item.products.image_url ||
+                    'https://via.placeholder.com/60/9CA3AF/FFFFFF?text=No+Image',
+                }}
+                style={styles.itemImage}
+              />
             </View>
           ))}
-          {items.length === 0 && (
-            <View style={styles.noItemsPlaceholder}>
-              <Text style={styles.noItemsText}>No items</Text>
+
+          {items.length > 3 && (
+            <View style={styles.moreBadge}>
+              <Text style={styles.moreText}>
+                +{items.length - 3}
+              </Text>
             </View>
           )}
         </View>
-        {items.length > 3 && (
-          <Text style={styles.moreItemsText}>
-            + {items.length - 3} more item{items.length - 3 > 1 ? 's' : ''}
+
+        {items.length > 0 && (
+          <Text style={styles.itemName} numberOfLines={1}>
+            {items[0].products.name}
           </Text>
         )}
+
         <Text style={styles.itemCountText}>
-          {totalItems} item{totalItems !== 1 ? 's' : ''} total
+          {totalItems} item{totalItems !== 1 ? 's' : ''}
         </Text>
       </View>
 
       {/* Divider */}
       <View style={styles.divider} />
 
-      {/* Footer with Total and Chevron */}
+      {/* Footer */}
       <View style={styles.footer}>
         <View>
-          <Text style={styles.totalLabel}>Total Amount</Text>
-          <Text style={styles.totalAmount}>${total_amount.toFixed(2)}</Text>
+          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.totalAmount}>{formattedPrice}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.chevronWrapper}
-          onPress={onPress}
-          disabled={!onPress}
-        >
-          <ChevronRight size={20} color={colors.gray[400]} />
-        </TouchableOpacity>
+
+        <View style={styles.chevronWrapper}>
+          <ChevronRight size={20} color={colors.gray[500]} />
+        </View>
       </View>
-    </Card>
+    </Pressable>
   );
 }
 
@@ -136,111 +170,131 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
     backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: colors.gray[100],
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    ...shadows.md,
   },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: spacing.md,
   },
+
   headerLeft: {
     flex: 1,
     marginRight: spacing.sm,
   },
+
   orderIdRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: borderRadius.full,
     marginRight: spacing.sm,
   },
+
   orderId: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.semibold,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
     color: colors.textPrimary,
   },
+
   dateTime: {
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: 2,
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[400],
+    marginTop: 4,
   },
+
   badge: {
-    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: borderRadius.full,
   },
+
   itemsContainer: {
     marginBottom: spacing.md,
   },
+
   itemsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
+    alignItems: 'center',
     marginBottom: spacing.sm,
   },
-  itemPreview: {},
+
   itemImageWrapper: {
-    width: 60,
-    height: 60,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gray[50],
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.full,
+    borderWidth: 2,
+    borderColor: '#fff',
+    marginLeft: -10,
     overflow: 'hidden',
-  },
-  itemImage: {
-    width: 60,
-    height: 60,
-    resizeMode: 'cover',
-  },
-  noItemsPlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: borderRadius.md,
     backgroundColor: colors.gray[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.sm,
   },
-  noItemsText: {
+
+  itemImage: {
+    width: '100%',
+    height: '100%',
+  },
+
+  moreBadge: {
+    backgroundColor: colors.gray[700],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: borderRadius.full,
+    marginLeft: spacing.sm,
+  },
+
+  moreText: {
+    color: '#fff',
+    fontSize: typography.fontSize.xs,
+    fontWeight: '600',
+  },
+
+  itemName: {
     fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
+    color: colors.gray[700],
   },
-  moreItemsText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.gray[500],
-    fontStyle: 'italic',
-    marginBottom: spacing.xs,
-  },
+
   itemCountText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[500],
+    marginTop: 2,
   },
+
   divider: {
     height: 1,
     backgroundColor: colors.gray[100],
     marginVertical: spacing.md,
+    opacity: 0.6,
   },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+
   totalLabel: {
-    fontSize: typography.fontSize.sm,
-    color: colors.textSecondary,
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[400],
   },
+
   totalAmount: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.bold,
+    fontSize: 20,
+    fontWeight: '700',
     color: colors.primary[600],
-    marginTop: 2,
   },
+
   chevronWrapper: {
-    padding: spacing.xs,
-    margin: -spacing.xs,
+    backgroundColor: colors.gray[50],
+    padding: 8,
+    borderRadius: borderRadius.full,
   },
 });

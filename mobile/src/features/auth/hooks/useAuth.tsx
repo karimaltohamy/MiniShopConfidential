@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../../../lib/supabase';
-import { authApi, RegisterData, LoginData } from '../api/authApi';
+import { authApi, RegisterData, LoginData, ResetPasswordData } from '../api/authApi';
 
 interface Profile {
   id: string;
@@ -17,6 +17,7 @@ interface AuthContextType {
   login: (data: LoginData) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (data: ResetPasswordData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,7 +75,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (data: LoginData) => {
-    await authApi.login(data);
+    const response = await authApi.login(data);
+    // Set Supabase session with tokens from backend
+    if (response?.session) {
+      await supabase.auth.setSession({
+        access_token: response.session.access_token,
+        refresh_token: response.session.refresh_token,
+      });
+    }
   };
 
   const logout = async () => {
@@ -83,6 +91,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const forgotPassword = async (email: string) => {
     await authApi.forgotPassword(email);
+  };
+
+  const resetPassword = async (data: ResetPasswordData) => {
+    await authApi.resetPassword(data);
   };
 
   return (
@@ -95,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         forgotPassword,
+        resetPassword,
       }}
     >
       {children}

@@ -1,3 +1,4 @@
+import { apiClient } from '../../../lib/api/client';
 import { supabase } from '../../../lib/supabase';
 
 export interface RegisterData {
@@ -11,74 +12,34 @@ export interface LoginData {
   password: string;
 }
 
+export interface ResetPasswordData {
+  token: string;
+  password: string;
+}
+
 export const authApi = {
-  async register(data: RegisterData, retries = 2, backoff = 1000): Promise<any> {
-    const { name, email, password } = data;
-
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
-      },
-    });
-
-    // Handle rate limiting with retry + exponential backoff
-    const isRateLimitError = authError?.status === 429 || authError?.message === 'email rate limit exceeded';
-    if (authError && isRateLimitError && retries > 0) {
-      await new Promise(resolve => setTimeout(resolve, backoff));
-      return this.register(data, retries - 1, backoff * 2);
-    }
-
-    if (authError) throw authError;
-
-    return authData;
+  async register(data: RegisterData) {
+    const response = await apiClient.post('/auth/register', data);
+    return response.data;
   },
 
   async login(data: LoginData) {
-    const { data: authData, error } = await supabase.auth.signInWithPassword(data);
+    const response = await apiClient.post('/auth/login', data);
+    return response.data;
+  },
 
-    console.log({
-      authData,
-      error
-    });
+  async forgotPassword(email: string) {
+    const response = await apiClient.post('/auth/forgot-password', { email });
+    return response.data;
+  },
 
-    if (error) throw error;
-
-    return authData;
+  async resetPassword(data: ResetPasswordData) {
+    const response = await apiClient.post('/auth/reset-password', data);
+    return response.data;
   },
 
   async logout() {
     const { error } = await supabase.auth.signOut();
-
     if (error) throw error;
-  },
-
-  async forgotPassword(email: string) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'myapp://reset-password',
-    });
-
-    if (error) throw error;
-  },
-
-  async getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
-
-    if (error) throw error;
-
-    if (!user) return null;
-
-    // Get profile with role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    return {
-      ...user,
-      profile,
-    };
   },
 };

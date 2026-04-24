@@ -1,6 +1,7 @@
 import { supabase } from '../../config/supabase';
+import { env } from '../../config/env';
 import { RegisterInput, LoginInput, ForgotPasswordInput } from '../../schemas/auth.schema';
-import { UnauthorizedError } from '../../utils/errors';
+import { UnauthorizedError, ValidationError } from '../../utils/errors';
 
 export class AuthService {
   async register(data: RegisterInput) {
@@ -70,16 +71,46 @@ export class AuthService {
     const { email } = data;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'myapp://reset-password',
+      redirectTo: env.RESET_PASSWORD_REDIRECT_URL,
     });
 
     if (error) {
-      throw new Error(error.message);
+      // Log error for monitoring but don't expose details to prevent user enumeration
+      console.error('Password reset error for email:', email, error.message);
+      // Optionally, you could throw a generic error for server errors (5xx)
+      // But for user-not-found, we still return success to avoid leaking info
     }
 
+    // Always return success to prevent email enumeration attacks
     return {
-      message: 'Password reset email sent',
+      message: 'If an account exists with this email, you will receive a password reset link shortly.',
     };
+  }
+
+  async resetPassword(data: { token: string; password: string }) {
+    const { token, password } = data;
+
+    // Verify the recovery token
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+      token,
+      type: 'recovery',
+    } as any); // Type cast for Supabase types
+
+    if (verifyError || !verifyData.user) {
+      throw new ValidationError('Invalid or expired reset token');
+    }
+
+    // Update password using admin privileges
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      verifyData.user.id,
+      { password }
+    );
+
+    if (updateError) {
+      throw new ValidationError(updateError.message);
+    }
+
+    return { message: 'Password reset successfully' };
   }
 
   async getMe(userId: string) {

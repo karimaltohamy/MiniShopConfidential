@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { AuthService } from './auth.service';
-import { registerSchema, loginSchema, forgotPasswordSchema } from '../../schemas/auth.schema';
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from '../../schemas/auth.schema';
 
 export class AuthController {
   private authService: AuthService;
@@ -24,6 +24,12 @@ export class AuthController {
   async forgotPassword(req: FastifyRequest, reply: FastifyReply) {
     const data = forgotPasswordSchema.parse(req.body);
     const result = await this.authService.forgotPassword(data);
+    return reply.send(result);
+  }
+
+  async resetPassword(req: FastifyRequest, reply: FastifyReply) {
+    const data = resetPasswordSchema.parse(req.body);
+    const result = await this.authService.resetPassword(data);
     return reply.send(result);
   }
 
