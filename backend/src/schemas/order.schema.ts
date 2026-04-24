@@ -11,11 +11,11 @@ export const createOrderSchema = z.object({
 });
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(['pending', 'processing', 'completed', 'cancelled']),
+  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
 });
 
 export const orderQuerySchema = z.object({
-  status: z.enum(['pending', 'processing', 'completed', 'cancelled']).optional(),
+  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).optional(),
   page: z.string().transform(Number).pipe(z.number().int().min(1)).default('1'),
   limit: z.string().transform(Number).pipe(z.number().int().min(1).max(100)).default('20'),
 });

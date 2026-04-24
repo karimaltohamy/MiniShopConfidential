@@ -13,9 +13,10 @@ export interface CreateOrderData {
 export interface Order {
   id: string;
   user_id: string;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   total_amount: number;
   created_at: string;
+  updated_at: string;
   order_items: {
     id: string;
     quantity: number;

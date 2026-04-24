@@ -3,13 +3,14 @@ import { FlatList, StyleSheet, RefreshControl, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Package, Calendar, Filter } from 'lucide-react-native';
-import { ordersApi, Order } from '../../features/orders/api/ordersApi';
-import { OrderCard } from '../../components/order/OrderCard';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { Skeleton } from '../../components/ui/Skeleton';
-import { colors, typography, spacing, borderRadius, shadows, gradients } from '../../theme';
-import { CustomHeader } from '../../components/navigation/CustomHeader';
-import { Badge } from '../../components/ui/Badge';
+import { ordersApi, Order } from '@/features/orders/api/ordersApi';
+import { OrderCard } from '@/components/order/OrderCard';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { colors, typography, spacing, borderRadius, shadows, gradients } from '@/theme';
+import { CustomHeader } from '@/components/navigation/CustomHeader';
+import { useOrdersRealtime } from '../../features/orders/hooks/useOrdersRealtime';
+import { useNetworkSync } from '../../features/orders/hooks/useNetworkSync';
 
 export default function OrdersScreen() {
   const { data: orders, isLoading, refetch, isRefetching } = useQuery({
@@ -17,26 +18,15 @@ export default function OrdersScreen() {
     queryFn: () => ordersApi.getMyOrders(),
   });
 
-  const orderStats = useMemo(() => {
-    if (!orders) return { total: 0, completed: 0, pending: 0, processing: 0, cancelled: 0 };
-    return {
-      total: orders.length,
-      completed: orders.filter(o => o.status === 'completed').length,
-      pending: orders.filter(o => o.status === 'pending').length,
-      processing: orders.filter(o => o.status === 'processing').length,
-      cancelled: orders.filter(o => o.status === 'cancelled').length,
-    };
-  }, [orders]);
+  // Subscribe to real-time order updates
+  useOrdersRealtime(true);
+
+  // Auto-refresh when app comes to foreground
+  useNetworkSync();
+
 
   const renderSkeleton = () => (
     <View style={styles.skeletonContainer}>
-      <View style={styles.statsRow}>
-        {[1, 2, 3, 4].map((i) => (
-          <View key={i} style={styles.statSkeleton}>
-            <Skeleton height={64} style={styles.statSkeletonCard} />
-          </View>
-        ))}
-      </View>
       {[1, 2, 3].map((i) => (
         <View key={i} style={styles.skeletonCard}>
           <Skeleton height={140} />

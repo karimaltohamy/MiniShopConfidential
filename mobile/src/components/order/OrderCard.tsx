@@ -13,7 +13,7 @@ import { colors, typography, spacing, borderRadius, shadows } from '../../theme'
 
 interface OrderCardProps {
   id: string;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   total_amount: number;
   created_at: string;
   items: {
@@ -29,21 +29,24 @@ interface OrderCardProps {
 const statusVariants = {
   pending: 'warning' as const,
   processing: 'info' as const,
-  completed: 'success' as const,
+  shipped: 'info' as const,
+  delivered: 'success' as const,
   cancelled: 'error' as const,
 };
 
 const statusLabels = {
   pending: 'Pending',
   processing: 'Processing',
-  completed: 'Completed',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
   cancelled: 'Cancelled',
 };
 
 const statusDotColors = {
   pending: colors.warning[500],
   processing: colors.info[500],
-  completed: colors.success[500],
+  shipped: colors.info[600],
+  delivered: colors.success[500],
   cancelled: colors.error[500],
 };
 
