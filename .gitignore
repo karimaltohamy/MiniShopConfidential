@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables (but keep .env.example)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Backend
+backend/dist/
+backend/.env
+
+# Mobile (Expo)
+mobile/.expo/
+mobile/.expo-shared/
+mobile/web-build/
+mobile/build/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/cap/
+mobile/ios/build/
+mobile/app-transpiled/
+
+# Dashboard
+dashboard/dist/
+dashboard/build/
+dashboard/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Misc
+tmp/
+temp/
+coverage/
+.nyc_output/
