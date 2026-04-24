@@ -176,17 +176,20 @@ const styles = StyleSheet.create({
   titleContainer: {
     marginLeft: spacing.sm,
     flex: 1,
+    minWidth: 200,
   },
   title: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
     color: '#fff',
     letterSpacing: 0.5,
+    width: "100%"
   },
   subtitle: {
     fontSize: typography.fontSize.xs,
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 2,
+    minWidth: 200
   },
   cartIconContainer: {
     position: 'relative',

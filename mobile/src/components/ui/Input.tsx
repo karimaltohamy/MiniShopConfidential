@@ -33,11 +33,11 @@ export function Input({
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[
-        styles.inputWrapper,
-        isFocused && styles.inputWrapperFocused,
-        error && styles.inputWrapperError,
-      ]}>
+       <View style={[
+         styles.inputWrapper,
+         isFocused && styles.inputWrapperFocused,
+         error ? styles.inputWrapperError : undefined,
+       ]}>
         <TextInput
           style={[
             styles.input,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     ...shadows.md,
   },
   inputWrapperError: {
-    borderColor: colors.error,
+    borderColor: colors.error[500],
   },
   input: {
     paddingVertical: 14,
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   error: {
     fontSize: typography.fontSize.sm,
-    color: colors.error,
+    color: colors.error[500],
     marginTop: spacing.xs,
   },
 });

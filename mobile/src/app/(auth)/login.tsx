@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,54 +12,39 @@ import {
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ShoppingBag } from 'lucide-react-native';
+import { useFormik } from 'formik';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { colors, typography, spacing, borderRadius, shadows } from '@/theme';
+import { colors, typography, spacing } from '@/theme';
 import { CustomHeader } from '@/components/navigation/CustomHeader';
+import { LoginFormValues, loginSchema } from '@/utils/validations';
 
 export default function LoginScreen() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  const validate = () => {
-    const newErrors: { email?: string; password?: string } = {};
-
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const initialValues: LoginFormValues = {
+    email: '',
+    password: '',
   };
 
-  const handleLogin = async () => {
-    if (!validate()) return;
-
-    setLoading(true);
-    console.log({ email, password });
-
+  const handleSubmit = async (values: LoginFormValues) => {
     try {
-      await login({ email, password });
+      await login(values);
       router.replace('/(tabs)');
     } catch (error: any) {
-      console.log(error.response);
       Alert.alert('Login Failed', error.message || 'Invalid email or password');
-    } finally {
-      setLoading(false);
     }
   };
+
+  const formik = useFormik<LoginFormValues>({
+    initialValues,
+    validationSchema: loginSchema,
+    onSubmit: handleSubmit,
+  });
+
+  const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched, isSubmitting, setFieldValue } =
+    formik;
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
@@ -88,12 +73,10 @@ export default function LoginScreen() {
               label="Email"
               type="email"
               placeholder="Enter your email"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setErrors((prev) => ({ ...prev, email: undefined }));
-              }}
-              error={errors.email}
+              value={values.email}
+              onChangeText={handleChange('email')}
+              onBlur={handleBlur('email')}
+              error={touched.email ? errors.email : undefined}
               autoCapitalize="none"
             />
 
@@ -101,12 +84,10 @@ export default function LoginScreen() {
               label="Password"
               type="password"
               placeholder="Enter your password"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setErrors((prev) => ({ ...prev, password: undefined }));
-              }}
-              error={errors.password}
+              value={values.password}
+              onChangeText={handleChange('password')}
+              onBlur={handleBlur('password')}
+              error={touched.password ? errors.password : undefined}
             />
 
             <Link href="/(auth)/forgot-password" asChild>
@@ -114,13 +95,24 @@ export default function LoginScreen() {
             </Link>
 
             <Button
-              onPress={handleLogin}
-              loading={loading}
+              onPress={() => handleSubmitForm()}
+              loading={isSubmitting}
               fullWidth
               style={styles.loginButton}
             >
               Sign In
             </Button>
+
+            <TouchableOpacity
+              style={styles.demoButton}
+              onPress={() => {
+                setFieldValue('email', 'customer@test.com');
+                setFieldValue('password', 'Test1234!');
+                // setTimeout(() => handleSubmitForm(), 100);
+              }}
+            >
+              <Text style={styles.demoButtonText}>Try Demo Account</Text>
+            </TouchableOpacity>
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account? </Text>
@@ -180,6 +172,16 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     marginTop: spacing.md,
+  },
+  demoButton: {
+    marginTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  demoButtonText: {
+    fontSize: typography.fontSize.base,
+    color: colors.primary[500],
+    fontWeight: typography.fontWeight.medium,
   },
   footer: {
     flexDirection: 'row',

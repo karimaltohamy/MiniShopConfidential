@@ -12,7 +12,7 @@ export interface LoginData {
 }
 
 export const authApi = {
-  async register(data: RegisterData) {
+  async register(data: RegisterData, retries = 2, backoff = 1000): Promise<any> {
     const { name, email, password } = data;
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -22,6 +22,13 @@ export const authApi = {
         data: { name },
       },
     });
+
+    // Handle rate limiting with retry + exponential backoff
+    const isRateLimitError = authError?.status === 429 || authError?.message === 'email rate limit exceeded';
+    if (authError && isRateLimitError && retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, backoff));
+      return this.register(data, retries - 1, backoff * 2);
+    }
 
     if (authError) throw authError;
 

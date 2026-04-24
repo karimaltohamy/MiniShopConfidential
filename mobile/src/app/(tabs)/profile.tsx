@@ -26,8 +26,8 @@ export default function ProfileScreen() {
     ]);
   };
 
-   return (
-     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+  return (
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <CustomHeader title="Profile" showBack={false} showMenu />
       <ScrollView contentContainerStyle={styles.content}>
         {/* User Info */}
@@ -65,7 +65,7 @@ export default function ProfileScreen() {
           style={styles.logoutButton}
         >
           <View style={styles.logoutContent}>
-            <LogOut size={20} color={colors.error} />
+            <LogOut size={20} color={colors.error[500]} />
             <Text style={styles.logoutText}>Logout</Text>
           </View>
         </Button>
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   logoutButton: {
-    borderColor: colors.error,
+    borderColor: colors.error[500],
   },
   logoutContent: {
     flexDirection: 'row',
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
-    color: colors.error,
+    color: colors.error[500],
     marginLeft: spacing.sm,
   },
 });

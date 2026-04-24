@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,67 +7,57 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  TouchableOpacity,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserPlus } from 'lucide-react-native';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { useAuth } from '../../features/auth/hooks/useAuth';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
-import { CustomHeader } from '../../components/navigation/CustomHeader';
+import { useFormik } from 'formik';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { colors, typography, spacing } from '@/theme';
+import { CustomHeader } from '@/components/navigation/CustomHeader';
+import { registerSchema, RegisterFormValues } from '@/utils/validations';
 
 export default function RegisterScreen() {
   const { register } = useAuth();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{
-    name?: string;
-    email?: string;
-    password?: string;
-  }>({});
 
-  const validate = () => {
-    const newErrors: { name?: string; email?: string; password?: string } = {};
-
-    if (!name) {
-      newErrors.name = 'Name is required';
-    }
-
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const initialValues: RegisterFormValues = {
+    name: '',
+    email: '',
+    password: '',
   };
 
-  const handleRegister = async () => {
-    if (!validate()) return;
-
-    setLoading(true);
+  const handleSubmit = async (values: RegisterFormValues) => {
     try {
-      await register({ name, email, password });
+      await register(values);
       Alert.alert('Success', 'Account created! Please sign in.', [
         { text: 'OK', onPress: () => router.replace('/(auth)/login') },
       ]);
     } catch (error: any) {
-      Alert.alert('Registration Failed', error.message || 'Please try again');
-    } finally {
-      setLoading(false);
+      console.log({ error: error });
+
+      let title = 'Registration Failed';
+      let message = error.message || 'Please try again';
+
+      const isRateLimitError = error?.status === 429 || error?.message === 'email rate limit exceeded';
+      if (isRateLimitError) {
+        title = 'Too Many Attempts';
+        message = 'Too many registration attempts. Please wait a moment and try again.';
+      }
+
+      Alert.alert(title, message);
     }
   };
+
+  const formik = useFormik<RegisterFormValues>({
+    initialValues,
+    validationSchema: registerSchema,
+    onSubmit: handleSubmit,
+  });
+
+  const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched, isSubmitting, setFieldValue } =
+    formik;
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
@@ -95,24 +85,20 @@ export default function RegisterScreen() {
             <Input
               label="Name"
               placeholder="Enter your name"
-              value={name}
-              onChangeText={(text) => {
-                setName(text);
-                setErrors((prev) => ({ ...prev, name: undefined }));
-              }}
-              error={errors.name}
+              value={values.name}
+              onChangeText={handleChange('name')}
+              onBlur={handleBlur('name')}
+              error={touched.name ? errors.name : undefined}
             />
 
             <Input
               label="Email"
               type="email"
               placeholder="Enter your email"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setErrors((prev) => ({ ...prev, email: undefined }));
-              }}
-              error={errors.email}
+              value={values.email}
+              onChangeText={handleChange('email')}
+              onBlur={handleBlur('email')}
+              error={touched.email ? errors.email : undefined}
               autoCapitalize="none"
             />
 
@@ -120,17 +106,15 @@ export default function RegisterScreen() {
               label="Password"
               type="password"
               placeholder="Create a password"
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setErrors((prev) => ({ ...prev, password: undefined }));
-              }}
-              error={errors.password}
+              value={values.password}
+              onChangeText={handleChange('password')}
+              onBlur={handleBlur('password')}
+              error={touched.password ? errors.password : undefined}
             />
 
             <Button
-              onPress={handleRegister}
-              loading={loading}
+              onPress={() => handleSubmitForm()}
+              loading={isSubmitting}
               fullWidth
               style={styles.registerButton}
             >

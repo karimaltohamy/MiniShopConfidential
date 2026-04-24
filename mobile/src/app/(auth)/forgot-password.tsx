@@ -1,34 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Mail } from 'lucide-react-native';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { useAuth } from '../../features/auth/hooks/useAuth';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
-import { CustomHeader } from '../../components/navigation/CustomHeader';
+import { useFormik } from 'formik';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { colors, typography, spacing } from '@/theme';
+import { CustomHeader } from '@/components/navigation/CustomHeader';
+import { forgotPasswordSchema, ForgotPasswordFormValues } from '@/utils/validations';
 
 export default function ForgotPasswordScreen() {
   const { forgotPassword } = useAuth();
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleResetPassword = async () => {
-    if (!email) {
-      setError('Email is required');
-      return;
-    }
+  const initialValues: ForgotPasswordFormValues = {
+    email: '',
+  };
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Email is invalid');
-      return;
-    }
-
-    setLoading(true);
+  const handleSubmit = async (values: ForgotPasswordFormValues) => {
     try {
-      await forgotPassword(email);
+      await forgotPassword(values.email);
       Alert.alert(
         'Success',
         'Password reset link has been sent to your email.',
@@ -36,13 +28,20 @@ export default function ForgotPasswordScreen() {
       );
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to send reset link');
-    } finally {
-      setLoading(false);
     }
   };
 
-   return (
-     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+  const formik = useFormik<ForgotPasswordFormValues>({
+    initialValues,
+    validationSchema: forgotPasswordSchema,
+    onSubmit: handleSubmit,
+  });
+
+  const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched, isSubmitting } =
+    formik;
+
+  return (
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <CustomHeader
         title="Forgot Password"
         showBack
@@ -58,18 +57,16 @@ export default function ForgotPasswordScreen() {
             label="Email"
             type="email"
             placeholder="Enter your email"
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              setError('');
-            }}
-            error={error}
+            value={values.email}
+            onChangeText={handleChange('email')}
+            onBlur={handleBlur('email')}
+            error={touched.email ? errors.email : undefined}
             autoCapitalize="none"
           />
 
           <Button
-            onPress={handleResetPassword}
-            loading={loading}
+            onPress={() => handleSubmitForm()}
+            loading={isSubmitting}
             fullWidth
             style={styles.button}
           >
