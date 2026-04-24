@@ -4,14 +4,15 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 34 47% 48%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
@@ -19,11 +20,68 @@
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 199 89% 48%;
+    --ring: 34 47% 48%;
     --radius: 0.5rem;
+
+    /* Custom primary color palette (50-900) - Light Mode */
+    --primary-50: 42 56% 95%;
+    --primary-100: 30 50% 89%;
+    --primary-200: 32 47% 82%;
+    --primary-300: 33 46% 71%;
+    --primary-400: 34 45% 60%;
+    --primary-500: 34 47% 48%;
+    --primary-600: 34 46% 41%;
+    --primary-700: 34 45% 33%;
+    --primary-800: 34 44% 25%;
+    --primary-900: 34 44% 17%;
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --background: 222 30% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 28% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 28% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 34 47% 48%;
+    --primary-foreground: 222 30% 10%;
+
+    --secondary: 222 20% 18%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 18% 16%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 222 22% 20%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 18% 22%;
+    --input: 222 18% 20%;
+    --ring: 34 70% 55%;
+
+    --radius: 0.5rem;
+
+    --primary-50: 42 56% 95%;
+    --primary-100: 30 50% 89%;
+    --primary-200: 32 47% 82%;
+    --primary-300: 33 46% 71%;
+    --primary-400: 34 45% 60%;
+    --primary-500: 34 47% 48%;
+    --primary-600: 34 46% 41%;
+    --primary-700: 34 45% 33%;
+    --primary-800: 34 44% 25%;
+    --primary-900: 34 44% 17%;
   }
 }
 
@@ -31,6 +89,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
