@@ -12,19 +12,20 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { Search, X } from 'lucide-react-native';
+import { Search, X, ShoppingBag } from 'lucide-react-native';
 import { productsApi, Product, Category } from '../../features/products/api/productsApi';
 import { useCartStore } from '../../features/cart/store/cartStore';
 import { ProductCard } from '../../components/product/ProductCard';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { ShoppingBag } from 'lucide-react-native';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { CustomHeader } from '@/components/navigation/CustomHeader';
 
 export default function ShopScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const addItem = useCartStore((state) => state.addItem);
+  const itemCount = useCartStore((state) => state.getItemCount());
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -44,6 +45,9 @@ export default function ShopScreen() {
         category_id: selectedCategory || undefined,
       }),
   });
+
+  console.log({ products });
+
 
   const handleAddToCart = (product: Product) => {
     addItem({
@@ -81,7 +85,15 @@ export default function ShopScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader
+        title="Shop"
+        showBack={false}
+        showCart
+        cartItemCount={itemCount}
+        onCartPress={() => router.push('/(tabs)/cart')}
+      />
+
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputWrapper}>
@@ -193,14 +205,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[200],
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   searchInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
-    height: 44,
+    height: 48,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   searchIcon: {
     marginRight: spacing.sm,
@@ -209,6 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.fontSize.base,
     color: colors.textPrimary,
+    paddingVertical: spacing.sm,
   },
   categoriesContainer: {
     backgroundColor: '#fff',
@@ -218,6 +238,7 @@ const styles = StyleSheet.create({
   categoriesList: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    gap: spacing.sm,
   },
   categoryChip: {
     paddingHorizontal: spacing.md,
@@ -225,9 +246,12 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     backgroundColor: colors.gray[100],
     marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   categoryChipActive: {
     backgroundColor: colors.primary[500],
+    borderColor: colors.primary[600],
   },
   categoryText: {
     fontSize: typography.fontSize.sm,
@@ -239,6 +263,7 @@ const styles = StyleSheet.create({
   },
   grid: {
     padding: spacing.md,
+    gap: spacing.md,
   },
   productItem: {
     flex: 1,

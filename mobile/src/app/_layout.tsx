@@ -28,9 +28,8 @@ function RootLayoutContent() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="product/[id]" options={{ presentation: 'card', headerShown: true, title: 'Product Details' }} />
-      <Stack.Screen name="checkout" options={{ presentation: 'card', headerShown: true, title: 'Checkout' }} />
+      <Stack.Screen name="product/[id]" options={{ presentation: 'card' }} />
+      <Stack.Screen name="checkout" options={{ presentation: 'card' }} />
     </Stack>
   );
 }

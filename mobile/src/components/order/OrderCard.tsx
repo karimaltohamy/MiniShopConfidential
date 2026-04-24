@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import { ChevronRight } from 'lucide-react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
 
 interface OrderCardProps {
   id: string;
@@ -16,7 +17,7 @@ interface OrderCardProps {
       image_url?: string;
     };
   }[];
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 const statusVariants = {
@@ -31,6 +32,13 @@ const statusLabels = {
   processing: 'Processing',
   completed: 'Completed',
   cancelled: 'Cancelled',
+};
+
+const statusDotColors = {
+  pending: colors.warning[500],
+  processing: colors.info[500],
+  completed: colors.success[500],
+  cancelled: colors.error[500],
 };
 
 export function OrderCard({
@@ -48,40 +56,77 @@ export function OrderCard({
     day: 'numeric',
   });
 
+  const formattedTime = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <Card onPress={onPress} style={styles.card}>
+      {/* Header with Order ID, Status, and Date */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.orderId}>Order #{id.slice(0, 8)}</Text>
-          <Text style={styles.date}>{formattedDate}</Text>
+        <View style={styles.headerLeft}>
+          <View style={styles.orderIdRow}>
+            <View style={[styles.statusDot, { backgroundColor: statusDotColors[status] }]} />
+            <Text style={styles.orderId}>Order #{id.slice(0, 8)}</Text>
+          </View>
+          <Text style={styles.dateTime}>{formattedDate} at {formattedTime}</Text>
         </View>
-        <Badge variant={statusVariants[status]}>
+        <Badge variant={statusVariants[status]} style={styles.badge}>
           {statusLabels[status]}
         </Badge>
       </View>
 
-      <View style={styles.items}>
-        {items.slice(0, 3).map((item, index) => (
-          <View key={index} style={styles.item}>
-            <Image
-              source={{
-                uri: item.products.image_url || 'https://via.placeholder.com/40',
-              }}
-              style={styles.itemImage}
-            />
-            <Text style={styles.itemName} numberOfLines={1}>
-              {item.products.name} x{item.quantity}
-            </Text>
-          </View>
-        ))}
+      {/* Items Preview */}
+      <View style={styles.itemsContainer}>
+        <View style={styles.itemsRow}>
+          {items.slice(0, 3).map((item, index) => (
+            <View key={index} style={styles.itemPreview}>
+              <View style={[styles.itemImageWrapper, shadows.xs]}>
+                <Image
+                  source={{
+                    uri: item.products.image_url || 'https://via.placeholder.com/60/9CA3AF/FFFFFF?text=No+Image',
+                  }}
+                  style={styles.itemImage}
+                  defaultSource={{ uri: 'https://via.placeholder.com/60/9CA3AF/FFFFFF?text=No+Image' }}
+                />
+              </View>
+            </View>
+          ))}
+          {items.length === 0 && (
+            <View style={styles.noItemsPlaceholder}>
+              <Text style={styles.noItemsText}>No items</Text>
+            </View>
+          )}
+        </View>
         {items.length > 3 && (
-          <Text style={styles.moreItems}>+{items.length - 3} more items</Text>
+          <Text style={styles.moreItemsText}>
+            + {items.length - 3} more item{items.length - 3 > 1 ? 's' : ''}
+          </Text>
         )}
+        <Text style={styles.itemCountText}>
+          {totalItems} item{totalItems !== 1 ? 's' : ''} total
+        </Text>
       </View>
 
+      {/* Divider */}
+      <View style={styles.divider} />
+
+      {/* Footer with Total and Chevron */}
       <View style={styles.footer}>
-        <Text style={styles.totalLabel}>Total</Text>
-        <Text style={styles.totalAmount}>${total_amount.toFixed(2)}</Text>
+        <View>
+          <Text style={styles.totalLabel}>Total Amount</Text>
+          <Text style={styles.totalAmount}>${total_amount.toFixed(2)}</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.chevronWrapper}
+          onPress={onPress}
+          disabled={!onPress}
+        >
+          <ChevronRight size={20} color={colors.gray[400]} />
+        </TouchableOpacity>
       </View>
     </Card>
   );
@@ -90,6 +135,9 @@ export function OrderCard({
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: colors.gray[100],
   },
   header: {
     flexDirection: 'row',
@@ -97,58 +145,102 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: spacing.md,
   },
+  headerLeft: {
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  orderIdRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: borderRadius.full,
+    marginRight: spacing.sm,
+  },
   orderId: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.textPrimary,
   },
-  date: {
+  dateTime: {
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
     marginTop: 2,
   },
-  items: {
+  badge: {
+    alignSelf: 'flex-start',
+  },
+  itemsContainer: {
     marginBottom: spacing.md,
   },
-  item: {
+  itemsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  itemPreview: {},
+  itemImageWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gray[50],
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.xs,
+    overflow: 'hidden',
   },
   itemImage: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.sm,
+    width: 60,
+    height: 60,
+    resizeMode: 'cover',
+  },
+  noItemsPlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: borderRadius.md,
     backgroundColor: colors.gray[100],
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: spacing.sm,
   },
-  itemName: {
-    flex: 1,
-    fontSize: typography.fontSize.sm,
-    color: colors.textPrimary,
-  },
-  moreItems: {
+  noItemsText: {
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
+  },
+  moreItemsText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.gray[500],
     fontStyle: 'italic',
-    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  itemCountText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.gray[100],
+    marginVertical: spacing.md,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.gray[200],
-    paddingTop: spacing.md,
   },
   totalLabel: {
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.textPrimary,
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
   },
   totalAmount: {
     fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
-    color: colors.primary[500],
+    color: colors.primary[600],
+    marginTop: 2,
+  },
+  chevronWrapper: {
+    padding: spacing.xs,
+    margin: -spacing.xs,
   },
 });

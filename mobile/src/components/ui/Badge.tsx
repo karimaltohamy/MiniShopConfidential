@@ -27,16 +27,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[100],
   },
   success: {
-    backgroundColor: `${colors.success}15`,
+    backgroundColor: colors.success[500] + '15',
   },
   warning: {
-    backgroundColor: `${colors.warning}15`,
+    backgroundColor: colors.warning[500] + '15',
   },
   error: {
-    backgroundColor: `${colors.error}15`,
+    backgroundColor: colors.error[500] + '15',
   },
   info: {
-    backgroundColor: `${colors.info}15`,
+    backgroundColor: colors.info[500] + '15',
   },
   text: {
     fontSize: typography.fontSize.xs,
@@ -46,15 +46,15 @@ const styles = StyleSheet.create({
     color: colors.gray[700],
   },
   text_success: {
-    color: colors.success,
+    color: colors.success[500],
   },
   text_warning: {
-    color: colors.warning,
+    color: colors.warning[500],
   },
   text_error: {
-    color: colors.error,
+    color: colors.error[500],
   },
   text_info: {
-    color: colors.info,
+    color: colors.info[500],
   },
 });

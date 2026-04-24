@@ -6,9 +6,10 @@ import {
   StyleSheet,
   TextInputProps,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -23,6 +24,7 @@ export function Input({
   ...props
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const isPassword = type === 'password';
   const keyboardType =
@@ -31,17 +33,22 @@ export function Input({
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <View style={styles.inputWrapper}>
+      <View style={[
+        styles.inputWrapper,
+        isFocused && styles.inputWrapperFocused,
+        error && styles.inputWrapperError,
+      ]}>
         <TextInput
           style={[
             styles.input,
-            error && styles.inputError,
             isPassword && styles.inputWithIcon,
           ]}
           placeholderTextColor={colors.gray[400]}
           secureTextEntry={isPassword && !showPassword}
           keyboardType={keyboardType}
           autoCapitalize={type === 'email' ? 'none' : 'sentences'}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           {...props}
         />
         {isPassword && (
@@ -74,28 +81,36 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     position: 'relative',
+    backgroundColor: '#fff',
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: colors.gray[300],
+    ...shadows.sm,
+  },
+  inputWrapperFocused: {
+    borderColor: colors.primary[500],
+    ...shadows.md,
+  },
+  inputWrapperError: {
+    borderColor: colors.error,
   },
   input: {
-    borderWidth: 1,
-    borderColor: colors.gray[300],
-    borderRadius: borderRadius.md,
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: typography.fontSize.base,
     color: colors.textPrimary,
-    backgroundColor: '#fff',
   },
   inputWithIcon: {
     paddingRight: 48,
   },
-  inputError: {
-    borderColor: colors.error,
-  },
   iconButton: {
     position: 'absolute',
     right: 12,
-    top: 12,
-    padding: 4,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40,
   },
   error: {
     fontSize: typography.fontSize.sm,

@@ -1,6 +1,7 @@
 import { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
 import { AppError } from '../utils/errors';
+import { env } from '../config/env';
 
 export function errorHandler(
   error: FastifyError,
@@ -28,9 +29,10 @@ export function errorHandler(
 
   // Default 500
   req.log.error(error);
+  const message = env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred';
   return reply.code(500).send({
     statusCode: 500,
     error: 'Internal Server Error',
-    message: 'An unexpected error occurred',
+    message,
   });
 }

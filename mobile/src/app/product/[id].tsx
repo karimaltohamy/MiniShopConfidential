@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import { ChevronLeft, Heart } from 'lucide-react-native';
 import { productsApi } from '../../features/products/api/productsApi';
 import { useCartStore } from '../../features/cart/store/cartStore';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { CustomHeader } from '../../components/navigation/CustomHeader';
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -60,14 +62,22 @@ export default function ProductDetailScreen() {
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+   return (
+     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader
+        title="Product Details"
+        showBack
+        showMenu
+        onMenuPress={() => {}}
+      />
       <ScrollView contentContainerStyle={styles.content}>
-        <Image
-          source={{ uri: product.image_url || 'https://via.placeholder.com/400' }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: product.image_url || 'https://via.placeholder.com/400' }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        </View>
 
         <View style={styles.details}>
           {product.categories && (
@@ -100,10 +110,13 @@ export default function ProductDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
   },
   content: {
     paddingBottom: spacing.xl,
+  },
+  imageContainer: {
+    position: 'relative',
   },
   image: {
     width: '100%',
@@ -112,8 +125,14 @@ const styles = StyleSheet.create({
   },
   details: {
     padding: spacing.md,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    marginTop: -spacing.lg,
+    ...shadows.lg,
   },
   categoryBadge: {
+    alignSelf: 'flex-start',
     marginBottom: spacing.sm,
   },
   name: {
@@ -121,6 +140,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
+    lineHeight: typography.fontSize['2xl'] * typography.lineHeight.normal,
   },
   price: {
     fontSize: typography.fontSize['3xl'],

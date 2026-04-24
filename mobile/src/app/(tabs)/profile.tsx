@@ -2,11 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { User, LogOut, Info } from 'lucide-react-native';
+import { User, LogOut, Info, Settings, CreditCard } from 'lucide-react-native';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { colors, typography, spacing } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { CustomHeader } from '../../components/navigation/CustomHeader';
 
 export default function ProfileScreen() {
   const { user, profile, logout } = useAuth();
@@ -25,8 +26,9 @@ export default function ProfileScreen() {
     ]);
   };
 
-  return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+   return (
+     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader title="Profile" showBack={false} showMenu />
       <ScrollView contentContainerStyle={styles.content}>
         {/* User Info */}
         <Card style={styles.userCard}>
@@ -82,7 +84,7 @@ const styles = StyleSheet.create({
   },
   userCard: {
     alignItems: 'center',
-    paddingVertical: spacing.xl,
+    padding: spacing.lg,
     marginBottom: spacing.md,
   },
   avatar: {
@@ -118,6 +120,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     marginBottom: spacing.lg,
+    padding: spacing.md,
   },
   infoRow: {
     flexDirection: 'row',

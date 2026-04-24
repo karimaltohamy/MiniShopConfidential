@@ -8,7 +8,8 @@ import { useCartStore } from '../features/cart/store/cartStore';
 import { ordersApi } from '../features/orders/api/ordersApi';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { colors, typography, spacing } from '../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+import { CustomHeader } from '../components/navigation/CustomHeader';
 
 export default function CheckoutScreen() {
   const items = useCartStore((state) => state.items);
@@ -40,6 +41,7 @@ export default function CheckoutScreen() {
   if (orderPlaced) {
     return (
       <SafeAreaView style={styles.container}>
+        <CustomHeader title="Checkout" showBack={false} />
         <View style={styles.successContainer}>
           <CheckCircle size={80} color={colors.success} />
           <Text style={styles.successTitle}>Order Placed!</Text>
@@ -69,8 +71,9 @@ export default function CheckoutScreen() {
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+   return (
+     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader title="Checkout" showBack />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Order Summary</Text>
 
@@ -125,15 +128,18 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.textPrimary,
     marginBottom: spacing.md,
+    marginTop: spacing.sm,
   },
   orderSummary: {
     marginBottom: spacing.lg,
+    ...shadows.md,
   },
   orderItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   itemDetails: {
     flex: 1,
@@ -162,6 +168,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: spacing.md,
   },
   totalLabel: {
     fontSize: typography.fontSize.lg,

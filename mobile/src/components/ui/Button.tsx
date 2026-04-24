@@ -6,17 +6,22 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  Platform,
+  View,
 } from 'react-native';
-import { colors, typography, borderRadius } from '../../theme';
+import { LucideIcon } from 'lucide-react-native';
+import { colors, typography, borderRadius, shadows, spacing } from '../../theme';
 
 interface ButtonProps {
-  onPress: () => void;
-  children: string;
+  onPress: (e?: any) => void;
+  children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
+  leftIcon?: LucideIcon;
+  rightIcon?: LucideIcon;
   style?: ViewStyle;
 }
 
@@ -28,6 +33,8 @@ export function Button({
   loading = false,
   disabled = false,
   fullWidth = false,
+  leftIcon: LeftIcon,
+  rightIcon: RightIcon,
   style,
 }: ButtonProps) {
   const buttonStyle: ViewStyle = {
@@ -44,6 +51,8 @@ export function Button({
     ...styles[`textSize_${size}`],
   };
 
+  const isString = typeof children === 'string';
+
   return (
     <TouchableOpacity
       style={[buttonStyle, style]}
@@ -56,7 +65,11 @@ export function Button({
           color={variant === 'primary' ? '#fff' : colors.primary[500]}
         />
       ) : (
-        <Text style={textStyle}>{children}</Text>
+        <View style={styles.contentContainer}>
+          {LeftIcon && <LeftIcon size={size === 'sm' ? 14 : size === 'lg' ? 20 : 18} style={styles.leftIcon} />}
+          {isString ? <Text style={textStyle}>{children}</Text> : children}
+          {RightIcon && <RightIcon size={size === 'sm' ? 14 : size === 'lg' ? 20 : 18} style={styles.rightIcon} />}
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -68,6 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
+    ...shadows.sm,
   },
   primary: {
     backgroundColor: colors.primary[500],
@@ -77,23 +91,34 @@ const styles = StyleSheet.create({
   },
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.primary[500],
   },
   ghost: {
     backgroundColor: 'transparent',
+    ...Platform.select({
+      ios: {
+        shadowOpacity: 0,
+      },
+      android: {
+        elevation: 0,
+      },
+    }),
   },
   size_sm: {
     paddingVertical: 8,
     paddingHorizontal: 12,
+    minHeight: 36,
   },
   size_md: {
     paddingVertical: 12,
     paddingHorizontal: 16,
+    minHeight: 44,
   },
   size_lg: {
     paddingVertical: 16,
     paddingHorizontal: 24,
+    minHeight: 52,
   },
   fullWidth: {
     width: '100%',
@@ -101,8 +126,21 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  leftIcon: {
+    marginRight: spacing.xs,
+  },
+  rightIcon: {
+    marginLeft: spacing.xs,
+  },
   text: {
     fontWeight: typography.fontWeight.semibold,
+    letterSpacing: 0.3,
   },
   text_primary: {
     color: '#fff',

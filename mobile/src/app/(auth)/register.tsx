@@ -7,13 +7,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { UserPlus } from 'lucide-react-native';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../features/auth/hooks/useAuth';
-import { colors, typography, spacing } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { CustomHeader } from '../../components/navigation/CustomHeader';
 
 export default function RegisterScreen() {
   const { register } = useAuth();
@@ -67,7 +70,12 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader
+        title="Create Account"
+        showBack
+        subtitle="Sign up to start shopping"
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -76,9 +84,11 @@ export default function RegisterScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.header}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Sign up to start shopping</Text>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoCircle}>
+              <UserPlus size={48} color={colors.primary[500]} />
+            </View>
+            <Text style={styles.appName}>MiniShop</Text>
           </View>
 
           <View style={styles.form}>
@@ -143,28 +153,36 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: spacing.xl,
+    padding: spacing.lg,
   },
-  header: {
-    marginTop: spacing['2xl'],
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: spacing.xl,
     marginBottom: spacing.xl,
   },
-  title: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
+  logoCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.primary[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+    borderWidth: 3,
+    borderColor: colors.primary[200],
   },
-  subtitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
+  appName: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.primary[600],
+    letterSpacing: 1,
   },
   form: {
     flex: 1,
@@ -176,6 +194,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing.xl,
+    paddingBottom: spacing.lg,
   },
   footerText: {
     fontSize: typography.fontSize.base,

@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Mail } from 'lucide-react-native';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../features/auth/hooks/useAuth';
-import { colors, typography, spacing } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { CustomHeader } from '../../components/navigation/CustomHeader';
 
 export default function ForgotPasswordScreen() {
   const { forgotPassword } = useAuth();
@@ -39,14 +41,16 @@ export default function ForgotPasswordScreen() {
     }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
+   return (
+     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader
+        title="Forgot Password"
+        showBack
+        subtitle="Enter your email to reset password"
+      />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Forgot Password?</Text>
-          <Text style={styles.subtitle}>
-            Enter your email and we'll send you a link to reset your password
-          </Text>
+        <View style={styles.iconContainer}>
+          <Mail size={40} color={colors.primary[500]} />
         </View>
 
         <View style={styles.form}>
@@ -84,31 +88,28 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
   },
   content: {
     flexGrow: 1,
-    padding: spacing.xl,
+    padding: spacing.lg,
   },
-  header: {
-    marginTop: spacing['2xl'],
-    marginBottom: spacing.xl,
-  },
-  title: {
-    fontSize: typography.fontSize['3xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.primary[100],
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginTop: spacing.xl,
+    marginBottom: spacing.lg,
   },
   form: {
-    flex: 1,
+    marginTop: spacing.lg,
   },
   button: {
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
   },
   backLink: {
     fontSize: typography.fontSize.base,

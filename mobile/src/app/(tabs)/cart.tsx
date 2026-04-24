@@ -2,12 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { ShoppingCart } from 'lucide-react-native';
+import { ShoppingCart, Trash2 } from 'lucide-react-native';
 import { useCartStore } from '../../features/cart/store/cartStore';
 import { CartItem } from '../../components/cart/CartItem';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { colors, typography, spacing } from '../../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { CustomHeader } from '../../components/navigation/CustomHeader';
 
 export default function CartScreen() {
   const items = useCartStore((state) => state.items);
@@ -48,7 +49,8 @@ export default function CartScreen() {
 
   if (items.length === 0) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <CustomHeader title="Cart" showBack={false} />
         <EmptyState
           icon={ShoppingCart}
           title="Your cart is empty"
@@ -61,7 +63,8 @@ export default function CartScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader title="Cart" showBack={false} />
       <FlatList
         data={items}
         renderItem={({ item }) => (
@@ -100,6 +103,7 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.md,
+    paddingBottom: spacing.xl,
   },
   footer: {
     backgroundColor: '#fff',
@@ -107,12 +111,15 @@ const styles = StyleSheet.create({
     borderTopColor: colors.gray[200],
     padding: spacing.md,
     paddingBottom: spacing.lg,
+    marginBottom: spacing['3xl'],
+    ...shadows.lg,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.md,
+    paddingHorizontal: spacing.sm,
   },
   totalLabel: {
     fontSize: typography.fontSize.lg,

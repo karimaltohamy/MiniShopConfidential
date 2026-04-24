@@ -1,10 +1,11 @@
 import React from 'react';
 import { Tabs, Redirect } from 'expo-router';
 import { ShoppingBag, ShoppingCart, Package, User } from 'lucide-react-native';
+import { View, Text, StyleSheet, useColorScheme } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useCartStore } from '../../features/cart/store/cartStore';
 import { colors } from '../../theme';
-import { View, Text, StyleSheet } from 'react-native';
 
 function TabBarBadge({ count }: { count: number }) {
   if (count === 0) return null;
@@ -19,6 +20,8 @@ function TabBarBadge({ count }: { count: number }) {
 export default function TabLayout() {
   const { user } = useAuth();
   const itemCount = useCartStore((state) => state.getItemCount());
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   // Redirect to login if not authenticated
   if (!user) {
@@ -28,29 +31,49 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        tabBarShowLabel: true,
         tabBarActiveTintColor: colors.primary[500],
-        tabBarInactiveTintColor: colors.gray[400],
+        tabBarInactiveTintColor: isDark ? colors.gray[400] : colors.gray[500],
         tabBarStyle: {
-          borderTopWidth: 1,
-          borderTopColor: colors.gray[200],
-          paddingBottom: 8,
+          backgroundColor: colors.gray[500],
+          borderTopWidth: 0,
+          borderBottomWidth: 0,
+          borderLeftWidth: 0,
+          borderRightWidth: 0,
+          height: 70,
+          paddingBottom: 16,
           paddingTop: 8,
-          height: 60,
+          borderRadius: 50,
+          position: 'absolute',
+          bottom: 20,
+          marginHorizontal: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.15,
+          shadowRadius: 20,
+          elevation: 12,
+          overflow: 'hidden',
         },
+        tabBarBackground: () => (
+          <BlurView
+            intensity={30}
+            tint={isDark ? 'dark' : 'light'}
+            style={[
+              styles.blurContainer,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(11, 19, 38, 0.5)'
+                  : 'rgba(250, 249, 246, 0.85)',
+              },
+            ]}
+          />
+        ),
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: '#fff',
-          borderBottomWidth: 1,
-          borderBottomColor: colors.gray[200],
-        },
-        headerTitleStyle: {
-          fontSize: 18,
+          fontSize: 10,
           fontWeight: '700',
+          letterSpacing: 0.5,
         },
+        headerShown: false, // Hide native headers; we use CustomHeader in each screen
       }}
     >
       <Tabs.Screen
@@ -101,7 +124,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -8,
     top: -4,
-    backgroundColor: colors.error,
+    backgroundColor: colors.error[500],
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -113,5 +136,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     fontWeight: '700',
+  },
+  blurContainer: {
+    flex: 1,
+    borderRadius: 20,
   },
 });

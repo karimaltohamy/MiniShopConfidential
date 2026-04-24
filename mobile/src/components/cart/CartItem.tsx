@@ -55,7 +55,7 @@ export function CartItem({
               </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
-              <Trash2 size={18} color={colors.error} />
+                <Trash2 size={18} color={colors.error[500]} />
             </TouchableOpacity>
           </View>
         </View>
