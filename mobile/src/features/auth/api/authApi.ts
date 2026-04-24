@@ -31,6 +31,11 @@ export const authApi = {
   async login(data: LoginData) {
     const { data: authData, error } = await supabase.auth.signInWithPassword(data);
 
+    console.log({
+      authData,
+      error
+    });
+
     if (error) throw error;
 
     return authData;

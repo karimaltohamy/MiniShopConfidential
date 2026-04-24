@@ -10,10 +10,10 @@ import {
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { useAuth } from '../../features/auth/hooks/useAuth';
-import { colors, typography, spacing } from '../../theme';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { colors, typography, spacing } from '@/theme';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -45,10 +45,13 @@ export default function LoginScreen() {
     if (!validate()) return;
 
     setLoading(true);
+    console.log({ email, password });
+
     try {
       await login({ email, password });
       router.replace('/(tabs)');
     } catch (error: any) {
+      console.log(error.response);
       Alert.alert('Login Failed', error.message || 'Invalid email or password');
     } finally {
       setLoading(false);
