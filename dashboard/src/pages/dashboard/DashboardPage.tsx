@@ -34,7 +34,7 @@ export default function DashboardPage() {
     );
   }
 
-  const products = productsData || [];
+   const products = productsData?.data || [];
   const orders = ordersData?.data || [];
 
   return (
@@ -101,7 +101,7 @@ export default function DashboardPage() {
                     <TableCell className="font-mono text-sm">
                       {order.id.slice(0, 8)}...
                     </TableCell>
-                    <TableCell>{order.profile?.full_name || order.profile?.id || 'N/A'}</TableCell>
+                     <TableCell>{order.profiles?.name || order.user_id?.slice(0, 8) || 'N/A'}</TableCell>
                     <TableCell>
                       <Badge variant={statusVariants[order.status]}>
                         {order.status}

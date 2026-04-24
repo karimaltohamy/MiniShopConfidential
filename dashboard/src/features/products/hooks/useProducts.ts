@@ -3,7 +3,7 @@ import { productsApi } from '../api/productsApi';
 import { CreateProductInput, UpdateProductInput } from '@/types';
 import { toast } from 'sonner';
 
-export function useProducts(params?: { search?: string; category?: string }) {
+export function useProducts(params?: { search?: string; category_id?: string; page?: number; limit?: number }) {
   return useQuery({
     queryKey: ['products', params],
     queryFn: () => productsApi.getProducts(params),

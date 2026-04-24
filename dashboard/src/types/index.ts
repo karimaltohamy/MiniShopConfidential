@@ -70,7 +70,10 @@ export interface Order {
   total_amount: number;
   created_at: string;
   updated_at: string;
-  profile?: Profile;
+  profiles?: {
+    name: string;
+    email: string;
+  } | null;
   order_items?: OrderItem[];
 }
 
@@ -79,9 +82,13 @@ export interface OrderItem {
   order_id: string;
   product_id: string;
   quantity: number;
-  price: number;
+  unit_price: number;
   created_at: string;
-  product?: Product;
+  products?: {
+    id: string;
+    name: string;
+    image_url?: string;
+  } | null;
 }
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';

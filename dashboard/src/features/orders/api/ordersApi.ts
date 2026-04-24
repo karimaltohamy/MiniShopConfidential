@@ -15,7 +15,7 @@ export const ordersApi = {
   async getDashboardStats() {
     // This would typically be a separate endpoint, but we'll aggregate from orders
     const { data } = await apiClient.get<PaginatedResponse<Order>>('/orders', {
-      params: { limit: 1000 },
+      params: { limit: 100 },
     });
 
     const orders = data.data;

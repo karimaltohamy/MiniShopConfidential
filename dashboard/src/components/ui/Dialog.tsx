@@ -62,7 +62,7 @@ DialogContent.displayName = 'DialogContent';
 
 const DialogHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('flex flex-col space-y-1.5 text-center sm:text-left', className)} {...props} />
+    <div ref={ref} className={cn('flex flex-col space-y-1.5 text-center sm:text-left mb-5', className)} {...props} />
   )
 );
 DialogHeader.displayName = 'DialogHeader';

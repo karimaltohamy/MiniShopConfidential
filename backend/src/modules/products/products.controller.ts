@@ -17,11 +17,11 @@ export class ProductsController {
     const filters = productQuerySchema.parse(req.query);
 
     // If user is admin, show all products, otherwise only active ones
-    const products = req.user?.role === 'admin'
+    const result = req.user?.role === 'admin'
       ? await this.productsService.getAllProducts(filters)
       : await this.productsService.getProducts(filters);
 
-    return reply.send(products);
+    return reply.send(result);
   }
 
   async getProduct(

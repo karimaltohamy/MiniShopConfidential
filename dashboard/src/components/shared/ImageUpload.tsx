@@ -87,7 +87,7 @@ export default function ImageUpload({ value, onChange, onRemove, disabled }: Ima
       />
 
       {value ? (
-        <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+        <div className="relative min-h-48 w-full overflow-hidden rounded-lg border">
           <img src={value} alt="Product" className="h-full w-full object-cover" />
           {!disabled && (
             <button
@@ -105,7 +105,7 @@ export default function ImageUpload({ value, onChange, onRemove, disabled }: Ima
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || isUploading}
           className={cn(
-            'flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors',
+            'flex min-h-48 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors',
             'hover:border-primary hover:bg-primary/5',
             (disabled || isUploading) && 'cursor-not-allowed opacity-50'
           )}

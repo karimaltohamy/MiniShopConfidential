@@ -2,22 +2,16 @@ import { useState } from 'react';
 import { useOrders, useUpdateOrderStatus } from '@/features/orders/hooks/useOrders';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/Dialog';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import Badge from '@/components/ui/Badge';
 import Pagination from '@/components/shared/Pagination';
 import EmptyState from '@/components/shared/EmptyState';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart, Eye, RefreshCw } from 'lucide-react';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Order, OrderStatus } from '@/types';
+import OrderDetailsModal from '@/features/orders/components/OrderDetailsModal';
+import UpdateStatusModal from '@/features/orders/components/UpdateStatusModal';
 
 const statusVariants: Record<OrderStatus, 'default' | 'success' | 'warning' | 'error' | 'info'> = {
   pending: 'warning',
@@ -29,14 +23,6 @@ const statusVariants: Record<OrderStatus, 'default' | 'success' | 'warning' | 'e
 
 const statusOptions = [
   { value: '', label: 'All Statuses' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'processing', label: 'Processing' },
-  { value: 'shipped', label: 'Shipped' },
-  { value: 'delivered', label: 'Delivered' },
-  { value: 'cancelled', label: 'Cancelled' },
-];
-
-const updateStatusOptions = [
   { value: 'pending', label: 'Pending' },
   { value: 'processing', label: 'Processing' },
   { value: 'shipped', label: 'Shipped' },
@@ -160,7 +146,7 @@ export default function OrdersPage() {
                       <TableCell className="font-mono text-sm">
                         {order.id.slice(0, 8)}...
                       </TableCell>
-                      <TableCell>{order.profile?.full_name || 'N/A'}</TableCell>
+                       <TableCell>{order.profiles?.name || 'N/A'}</TableCell>
                       <TableCell>{order.order_items?.length || 0}</TableCell>
                       <TableCell className="font-medium">
                         {formatCurrency(order.total_amount)}
@@ -173,25 +159,26 @@ export default function OrdersPage() {
                       <TableCell className="text-muted-foreground">
                         {formatDateTime(order.created_at)}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openDetailsDialog(order)}
-                            leftIcon={<Eye className="h-4 w-4" />}
-                          >
-                            View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openStatusDialog(order)}
-                          >
-                            Update Status
-                          </Button>
-                        </div>
-                      </TableCell>
+                       <TableCell className="text-right">
+                         <div className="flex justify-end gap-2">
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => openDetailsDialog(order)}
+                             leftIcon={<Eye className="h-4 w-4" />}
+                           >
+                             View
+                           </Button>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => openStatusDialog(order)}
+                             leftIcon={<RefreshCw className="h-4 w-4" />}
+                           >
+                             Update Status
+                           </Button>
+                         </div>
+                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -211,104 +198,23 @@ export default function OrdersPage() {
         </CardContent>
       </Card>
 
-      {/* Order Details Dialog */}
-      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-        <DialogContent onClose={() => setIsDetailsDialogOpen(false)}>
-          <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
-            <DialogDescription>
-              Order ID: {selectedOrder?.id}
-            </DialogDescription>
-          </DialogHeader>
+      {/* Order Details Modal */}
+      <OrderDetailsModal
+        open={isDetailsDialogOpen}
+        onOpenChange={setIsDetailsDialogOpen}
+        order={selectedOrder}
+      />
 
-          {selectedOrder && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Customer</p>
-                  <p className="text-sm">{selectedOrder.profile?.full_name || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <Badge variant={statusVariants[selectedOrder.status]}>
-                    {selectedOrder.status}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                  <p className="text-sm font-bold">
-                    {formatCurrency(selectedOrder.total_amount)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Order Date</p>
-                  <p className="text-sm">{formatDateTime(selectedOrder.created_at)}</p>
-                </div>
-              </div>
-
-              {selectedOrder.order_items && selectedOrder.order_items.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Order Items</p>
-                  <div className="space-y-2">
-                    {selectedOrder.order_items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex justify-between items-center p-2 bg-muted rounded"
-                      >
-                        <div>
-                          <p className="text-sm font-medium">
-                            {item.product?.name || 'Unknown Product'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Quantity: {item.quantity}
-                          </p>
-                        </div>
-                        <p className="text-sm font-medium">
-                          {formatCurrency(item.price * item.quantity)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button onClick={() => setIsDetailsDialogOpen(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Update Status Dialog */}
-      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-        <DialogContent onClose={() => setIsStatusDialogOpen(false)}>
-          <DialogHeader>
-            <DialogTitle>Update Order Status</DialogTitle>
-            <DialogDescription>
-              Change the status of order {selectedOrder?.id.slice(0, 8)}...
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <Select
-              label="New Status"
-              options={updateStatusOptions}
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value as OrderStatus)}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsStatusDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateStatus} isLoading={updateOrderStatus.isPending}>
-              Update Status
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Update Status Modal */}
+      <UpdateStatusModal
+        open={isStatusDialogOpen}
+        onOpenChange={setIsStatusDialogOpen}
+        order={selectedOrder}
+        newStatus={newStatus}
+        onStatusChange={setNewStatus}
+        isUpdating={updateOrderStatus.isPending}
+        onUpdate={handleUpdateStatus}
+      />
     </div>
   );
 }

@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   useProducts,
@@ -11,23 +9,16 @@ import {
 } from '@/features/products/hooks/useProducts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/Dialog';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import Badge from '@/components/ui/Badge';
+import Pagination from '@/components/shared/Pagination';
 import EmptyState from '@/components/shared/EmptyState';
-import ImageUpload from '@/components/shared/ImageUpload';
 import { Plus, Pencil, Trash2, Package } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { Product, CreateProductInput } from '@/types';
+import { Product } from '@/types';
+import ProductModal from '@/features/products/components/ProductModal';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -44,56 +35,33 @@ export default function ProductsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: products, isLoading } = useProducts({ search: searchQuery, category: selectedCategory });
+  const { data: productsData, isLoading } = useProducts({
+    search: searchQuery,
+    ...(selectedCategoryId && { category_id: selectedCategoryId }),
+    page: currentPage,
+    limit: 10,
+  });
   const { data: categories } = useCategories();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
-  });
-
-  const imageUrl = watch('image_url');
-
   const openCreateDialog = () => {
     setEditingProduct(null);
-    reset({
-      name: '',
-      description: '',
-      price: 0,
-      category_id: '',
-      stock: 0,
-      image_url: '',
-    });
     setIsDialogOpen(true);
   };
 
   const openEditDialog = (product: Product) => {
     setEditingProduct(product);
-    reset({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category_id: product.category_id,
-      stock: product.stock,
-      image_url: product.image_url || '',
-    });
     setIsDialogOpen(true);
   };
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      const input: CreateProductInput = {
+      const input = {
         name: data.name,
         description: data.description,
         price: Number(data.price),
@@ -109,7 +77,6 @@ export default function ProductsPage() {
       }
 
       setIsDialogOpen(false);
-      reset();
     } catch (error) {
       // Error handled by mutation hooks
     }
@@ -157,14 +124,20 @@ export default function ProductsPage() {
               <Input
                 placeholder="Search products..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
             <div className="w-64">
               <Select
                 options={categoryOptions}
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                value={selectedCategoryId}
+                onChange={(e) => {
+                  setSelectedCategoryId(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
           </div>
@@ -174,10 +147,10 @@ export default function ProductsPage() {
       {/* Products Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Products ({products?.length || 0})</CardTitle>
+          <CardTitle>All Products ({productsData?.data?.length || 0})</CardTitle>
         </CardHeader>
         <CardContent>
-          {!products || products.length === 0 ? (
+          {!productsData?.data || productsData.data.length === 0 ? (
             <EmptyState
               icon={Package}
               title="No products found"
@@ -199,7 +172,7 @@ export default function ProductsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
+                {productsData.data.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       {product.image_url ? (
@@ -215,7 +188,7 @@ export default function ProductsPage() {
                       )}
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category?.name || 'N/A'}</TableCell>
+                    <TableCell>{product?.category?.name || 'N/A'}</TableCell>
                     <TableCell>{formatCurrency(product.price)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>
@@ -251,72 +224,27 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent onClose={() => setIsDialogOpen(false)}>
-          <DialogHeader>
-            <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-          </DialogHeader>
+      {/* Pagination */}
+      {productsData?.pagination && productsData.pagination.totalPages > 1 && (
+        <div className="mt-6">
+          <Pagination
+            currentPage={productsData.pagination.page}
+            totalPages={productsData.pagination.totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <ImageUpload
-              value={imageUrl}
-              onChange={(url) => setValue('image_url', url)}
-              onRemove={() => setValue('image_url', '')}
-            />
-
-            <Input label="Name" error={errors.name?.message} {...register('name')} />
-
-            <Textarea
-              label="Description"
-              error={errors.description?.message}
-              {...register('description')}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Price"
-                type="number"
-                step="0.01"
-                error={errors.price?.message}
-                {...register('price')}
-              />
-
-              <Input
-                label="Stock"
-                type="number"
-                error={errors.stock?.message}
-                {...register('stock')}
-              />
-            </div>
-
-            <Select
-              label="Category"
-              options={
-                categories?.map((cat) => ({ value: cat.id, label: cat.name })) || []
-              }
-              error={errors.category_id?.message}
-              {...register('category_id')}
-            />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                isLoading={createProduct.isPending || updateProduct.isPending}
-              >
-                {editingProduct ? 'Update' : 'Create'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Product Modal */}
+      <ProductModal
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        editingProduct={editingProduct}
+        onSubmit={onSubmit}
+        categories={categories || []}
+        isCreating={createProduct.isPending}
+        isUpdating={updateProduct.isPending}
+      />
     </div>
   );
 }

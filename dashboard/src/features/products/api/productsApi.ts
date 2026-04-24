@@ -1,9 +1,9 @@
 import { apiClient } from '@/lib/api';
-import { Product, Category, CreateProductInput, UpdateProductInput } from '@/types';
+import { Product, Category, CreateProductInput, UpdateProductInput, PaginatedResponse } from '@/types';
 
 export const productsApi = {
-  async getProducts(params?: { search?: string; category?: string }) {
-    const { data } = await apiClient.get<Product[]>('/products', { params });
+  async getProducts(params?: { search?: string; category_id?: string; page?: number; limit?: number }) {
+    const { data } = await apiClient.get<PaginatedResponse<Product>>('/products', { params });
     return data;
   },
 

@@ -86,8 +86,8 @@ export default function LoginPage() {
 
               <div className="mt-4 rounded-md bg-muted p-3 text-sm">
                 <p className="font-medium">Demo Credentials:</p>
-                <p className="text-muted-foreground">Email: admin@example.com</p>
-                <p className="text-muted-foreground">Password: admin123</p>
+                <p className="text-muted-foreground">Email: admin@test.com</p>
+                <p className="text-muted-foreground">Password: Admin1234!</p>
               </div>
             </form>
           </CardContent>
