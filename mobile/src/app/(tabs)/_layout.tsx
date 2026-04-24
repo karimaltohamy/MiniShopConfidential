@@ -1,27 +1,36 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tabs, Redirect } from 'expo-router';
 import { ShoppingBag, ShoppingCart, Package, User } from 'lucide-react-native';
-import { View, Text, StyleSheet, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useCartStore } from '../../features/cart/store/cartStore';
-import { colors } from '../../theme';
-
-function TabBarBadge({ count }: { count: number }) {
-  if (count === 0) return null;
-
-  return (
-    <View style={styles.badge}>
-      <Text style={styles.badgeText}>{count > 99 ? '99+' : count}</Text>
-    </View>
-  );
-}
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function TabLayout() {
   const { user } = useAuth();
   const itemCount = useCartStore((state) => state.getItemCount());
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { theme, isDark } = useTheme();
+  const c = theme.colors;
+
+  const themedStyles = useMemo(
+    () => ({
+      badgeBackground: {
+        backgroundColor: c.error[500],
+      },
+    }),
+    [c]
+  );
+
+  function TabBarBadge({ count }: { count: number }) {
+    if (count === 0) return null;
+
+    return (
+      <View style={[styles.badge, themedStyles.badgeBackground]}>
+        <Text style={styles.badgeText}>{count > 99 ? '99+' : count}</Text>
+      </View>
+    );
+  }
 
   // Redirect to login if not authenticated
   if (!user) {
@@ -32,10 +41,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarShowLabel: true,
-        tabBarActiveTintColor: colors.primary[500],
-        tabBarInactiveTintColor: isDark ? colors.gray[400] : colors.gray[500],
+        tabBarActiveTintColor: c.primary[500],
+        tabBarInactiveTintColor: isDark ? c.gray[400] : c.gray[500],
         tabBarStyle: {
-          backgroundColor: colors.gray[500],
+          backgroundColor: isDark ? c.card : c.surface,
           borderTopWidth: 0,
           borderBottomWidth: 0,
           borderLeftWidth: 0,
@@ -47,9 +56,9 @@ export default function TabLayout() {
           position: 'absolute',
           bottom: 20,
           marginHorizontal: 20,
-          shadowColor: '#000',
+          shadowColor: isDark ? '#000' : c.primary[500],
           shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.15,
+          shadowOpacity: isDark ? 0.3 : 0.15,
           shadowRadius: 20,
           elevation: 12,
           overflow: 'hidden',
@@ -61,9 +70,7 @@ export default function TabLayout() {
             style={[
               styles.blurContainer,
               {
-                backgroundColor: isDark
-                  ? 'rgba(11, 19, 38, 0.5)'
-                  : 'rgba(250, 249, 246, 0.85)',
+                backgroundColor: isDark ? c.card : c.surface,
               },
             ]}
           />
@@ -73,7 +80,7 @@ export default function TabLayout() {
           fontWeight: '700',
           letterSpacing: 0.5,
         },
-        headerShown: false, // Hide native headers; we use CustomHeader in each screen
+        headerShown: false,
       }}
     >
       <Tabs.Screen
@@ -124,7 +131,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -8,
     top: -4,
-    backgroundColor: colors.error[500],
     borderRadius: 10,
     minWidth: 18,
     height: 18,

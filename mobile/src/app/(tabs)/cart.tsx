@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, FlatList, Alert, ViewStyle, TextStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ShoppingCart, Trash2 } from 'lucide-react-native';
@@ -7,10 +7,53 @@ import { useCartStore } from '../../features/cart/store/cartStore';
 import { CartItem } from '../../components/cart/CartItem';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 import { CustomHeader } from '../../components/navigation/CustomHeader';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function CartScreen() {
+  const { theme } = useTheme();
+  const c = theme.colors;
+
+  const themedStyles = useMemo(
+    () => ({
+      container: {
+        flex: 1,
+        backgroundColor: c.background,
+      } as ViewStyle,
+      list: {
+        padding: spacing.md,
+        paddingBottom: spacing.xl,
+      } as ViewStyle,
+      footer: {
+        backgroundColor: c.card,
+        borderTopWidth: 1,
+        borderTopColor: c.border,
+        padding: spacing.md,
+        paddingBottom: spacing.lg,
+        marginBottom: spacing['3xl' as keyof typeof spacing] as number, // cast to access '3xl'
+      } as ViewStyle,
+      totalRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.md,
+        paddingHorizontal: spacing.sm,
+      } as ViewStyle,
+      totalLabel: {
+        fontSize: 18, // typography.fontSize.lg
+        fontWeight: '600' as any,
+        color: c.textPrimary,
+      } as TextStyle,
+      totalAmount: {
+        fontSize: 24, // typography.fontSize['2xl']
+        fontWeight: '700' as any,
+        color: c.primary[500],
+      } as TextStyle,
+    }),
+    [c]
+  );
+
   const items = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -29,18 +72,10 @@ export default function CartScreen() {
   };
 
   const handleRemove = (productId: string) => {
-    Alert.alert(
-      'Remove Item',
-      'Are you sure you want to remove this item from your cart?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => removeItem(productId),
-        },
-      ]
-    );
+    Alert.alert('Remove Item', 'Are you sure you want to remove this item from your cart?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => removeItem(productId) },
+    ]);
   };
 
   const handleCheckout = () => {
@@ -49,7 +84,7 @@ export default function CartScreen() {
 
   if (items.length === 0) {
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
         <CustomHeader title="Cart" showBack={false} />
         <EmptyState
           icon={ShoppingCart}
@@ -63,7 +98,7 @@ export default function CartScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
       <CustomHeader title="Cart" showBack={false} />
       <FlatList
         data={items}
@@ -80,13 +115,13 @@ export default function CartScreen() {
           />
         )}
         keyExtractor={(item) => item.product_id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={themedStyles.list}
       />
 
-      <View style={styles.footer}>
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalAmount}>${getTotal().toFixed(2)}</Text>
+      <View style={themedStyles.footer}>
+        <View style={themedStyles.totalRow}>
+          <Text style={themedStyles.totalLabel}>Total</Text>
+          <Text style={themedStyles.totalAmount}>${getTotal().toFixed(2)}</Text>
         </View>
         <Button onPress={handleCheckout} fullWidth size="lg">
           Proceed to Checkout
@@ -95,40 +130,3 @@ export default function CartScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  list: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-  },
-  footer: {
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: colors.gray[200],
-    padding: spacing.md,
-    paddingBottom: spacing.lg,
-    marginBottom: spacing['3xl'],
-    ...shadows.lg,
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.sm,
-  },
-  totalLabel: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: typography.fontWeight.semibold,
-    color: colors.textPrimary,
-  },
-  totalAmount: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[500],
-  },
-});

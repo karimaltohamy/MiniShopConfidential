@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   Alert,
   ActivityIndicator,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,13 +14,53 @@ import { useFormik } from 'formik';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { colors, typography, spacing } from '@/theme';
+import { spacing, typography, borderRadius } from '@/theme';
 import { CustomHeader } from '@/components/navigation/CustomHeader';
 import { ResetPasswordFormValues, resetPasswordSchema } from '@/utils/validations';
 import * as Linking from 'expo-linking';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function ResetPasswordScreen() {
   const { resetPassword } = useAuth();
+  const { theme } = useTheme();
+  const c = theme.colors;
+
+  const themedStyles = useMemo(
+    () => ({
+      container: {
+        flex: 1,
+        backgroundColor: c.surface,
+      } as ViewStyle,
+      content: {
+        flexGrow: 1,
+        padding: spacing.lg,
+      } as ViewStyle,
+      form: {
+        flex: 1,
+      } as ViewStyle,
+      loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      } as ViewStyle,
+      loadingText: {
+        marginTop: spacing.md,
+        fontSize: typography.fontSize.base,
+        color: c.textSecondary,
+      } as TextStyle,
+      errorText: {
+        fontSize: typography.fontSize.base,
+        color: c.error[500],
+        textAlign: 'center',
+        marginTop: spacing.md,
+      } as TextStyle,
+      button: {
+        marginTop: spacing.lg,
+      } as ViewStyle,
+    }),
+    [c]
+  );
+
   const [token, setToken] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -81,17 +122,16 @@ export default function ResetPasswordScreen() {
     onSubmit: handleSubmit,
   });
 
-  const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched, isSubmitting } =
-    formik;
+  const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched } = formik;
 
   // Loading state while extracting token
   if (!token && !errorMsg) {
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
         <CustomHeader title="Verifying Link" showBack subtitle="" />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary[500]} />
-          <Text style={styles.loadingText}>Verifying your reset link...</Text>
+        <View style={themedStyles.loadingContainer}>
+          <ActivityIndicator size="large" color={c.primary[500]} />
+          <Text style={themedStyles.loadingText}>Verifying your reset link...</Text>
         </View>
       </SafeAreaView>
     );
@@ -100,40 +140,20 @@ export default function ResetPasswordScreen() {
   // Error state if token missing or invalid
   if (errorMsg) {
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-        <CustomHeader title="Invalid Link" showBack subtitle="" />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorIcon}>⚠️</Text>
-          <Text style={styles.errorTitle}>Link Expired or Invalid</Text>
-          <Text style={styles.errorMessage}>{errorMsg}</Text>
-          <Button
-            onPress={() => router.push('/(auth)/forgot-password')}
-            fullWidth
-            style={styles.button}
-          >
-            Request New Link
-          </Button>
-          <Link href="/(auth)/login" asChild>
-            <Text style={styles.backLink}>Back to Login</Text>
-          </Link>
+      <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
+        <CustomHeader title="Error" showBack />
+        <View style={themedStyles.loadingContainer}>
+          <Text style={themedStyles.errorText}>{errorMsg}</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <CustomHeader
-        title="Reset Password"
-        showBack
-        subtitle="Create a new password for your account"
-      />
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.iconContainer}>
-          <Text style={styles.lockIcon}>🔒</Text>
-        </View>
-
-        <View style={styles.form}>
+    <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader title="Reset Password" showBack subtitle="Enter your new password" />
+      <ScrollView contentContainerStyle={themedStyles.content}>
+        <View style={themedStyles.form}>
           <Input
             label="New Password"
             type="password"
@@ -142,7 +162,6 @@ export default function ResetPasswordScreen() {
             onChangeText={handleChange('password')}
             onBlur={handleBlur('password')}
             error={touched.password ? errors.password : undefined}
-            autoCapitalize="none"
           />
 
           <Input
@@ -153,93 +172,13 @@ export default function ResetPasswordScreen() {
             onChangeText={handleChange('confirmPassword')}
             onBlur={handleBlur('confirmPassword')}
             error={touched.confirmPassword ? errors.confirmPassword : undefined}
-            autoCapitalize="none"
           />
 
-          <Button
-            onPress={() => handleSubmitForm()}
-            loading={isSubmitting || submitting}
-            fullWidth
-            style={styles.button}
-          >
-            Update Password
+          <Button onPress={() => handleSubmitForm()} loading={submitting} fullWidth style={themedStyles.button}>
+            Reset Password
           </Button>
-
-          <Link href="/(auth)/login" asChild>
-            <Text style={styles.backLink}>Back to Login</Text>
-          </Link>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  content: {
-    flexGrow: 1,
-    padding: spacing.lg,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.primary[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: spacing.xl,
-    marginBottom: spacing.lg,
-  },
-  lockIcon: {
-    fontSize: 40,
-  },
-  form: {
-    marginTop: spacing.lg,
-  },
-  button: {
-    marginTop: spacing.lg,
-  },
-  backLink: {
-    fontSize: typography.fontSize.base,
-    color: colors.primary[500],
-    textAlign: 'center',
-    marginTop: spacing.lg,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  loadingText: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
-    marginTop: spacing.md,
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  errorIcon: {
-    fontSize: 64,
-    marginBottom: spacing.md,
-  },
-  errorTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  errorMessage: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-});

@@ -27,11 +27,21 @@ export interface Category {
   slug: string;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    limit: number;
+    page: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export const productsApi = {
-  async getProducts(params?: { search?: string; category_id?: string }) {
+  async getProducts(params?: { search?: string; category_id?: string; page?: number; limit?: number }) {
     console.log('productsApi.getProducts called with params:', params);
     try {
-      const response = await apiClient.get<Product[]>('/products', { params });
+      const response = await apiClient.get<PaginatedResponse<Product>>('/products', { params });
       console.log('productsApi response:', JSON.stringify(response.data, null, 2));
       return response.data;
     } catch (error: any) {

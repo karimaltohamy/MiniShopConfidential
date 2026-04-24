@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle, TouchableOpacity, Platform } from 'react-native';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { View, ViewStyle, TouchableOpacity } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+import { borderRadius, shadows } from '../../theme';
 
 interface CardProps {
   children: React.ReactNode;
@@ -10,19 +11,42 @@ interface CardProps {
 }
 
 export function Card({ children, onPress, style, variant = 'elevated' }: CardProps) {
-  const cardStyle = [
-    styles.card,
-    styles[variant],
-    style,
-  ];
+  const { theme } = useTheme();
+  const themeColors = theme.colors;
+
+  const baseStyle: ViewStyle = {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+  };
+
+  const variantStyle: ViewStyle = (() => {
+    switch (variant) {
+      case 'elevated':
+        return {
+          backgroundColor: themeColors.card,
+          ...shadows.md,
+        };
+      case 'outlined':
+        return {
+          backgroundColor: themeColors.card,
+          borderColor: themeColors.border,
+        };
+      case 'filled':
+        return {
+          backgroundColor: themeColors.muted,
+          borderColor: 'transparent',
+        };
+      default:
+        return {};
+    }
+  })();
+
+  const cardStyle = [baseStyle, style, variantStyle];
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        style={cardStyle}
-        onPress={onPress}
-        activeOpacity={0.7}
-      >
+      <TouchableOpacity style={cardStyle} onPress={onPress} activeOpacity={0.7}>
         {children}
       </TouchableOpacity>
     );
@@ -30,25 +54,3 @@ export function Card({ children, onPress, style, variant = 'elevated' }: CardPro
 
   return <View style={cardStyle}>{children}</View>;
 }
-
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: colors.gray[100],
-  },
-  elevated: {
-    backgroundColor: '#fff',
-    ...shadows.md,
-  },
-  outlined: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-  },
-  filled: {
-    backgroundColor: colors.gray[50],
-  },
-});

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { colors, typography, borderRadius } from '../../theme';
+import { View, Text, ViewStyle, TextStyle } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+import { borderRadius, typography } from '../../theme';
 
 interface BadgeProps {
   children: string;
@@ -9,52 +10,56 @@ interface BadgeProps {
 }
 
 export function Badge({ children, variant = 'default', style }: BadgeProps) {
-  return (
-    <View style={[styles.badge, styles[variant], style]}>
-      <Text style={[styles.text, styles[`text_${variant}`]]}>{children}</Text>
-    </View>
-  );
-}
+  const { theme } = useTheme();
+  const themeColors = theme.colors;
 
-const styles = StyleSheet.create({
-  badge: {
+  const getBackgroundColor = (): string => {
+    switch (variant) {
+      case 'success':
+        return themeColors.success[500] + '15';
+      case 'warning':
+        return themeColors.warning[500] + '15';
+      case 'error':
+        return themeColors.error[500] + '15';
+      case 'info':
+        return themeColors.info[500] + '15';
+      default:
+        return themeColors.gray[200];
+    }
+  };
+
+  const getTextColor = (): string => {
+    switch (variant) {
+      case 'success':
+        return themeColors.success[500];
+      case 'warning':
+        return themeColors.warning[500];
+      case 'error':
+        return themeColors.error[500];
+      case 'info':
+        return themeColors.info[500];
+      default:
+        return themeColors.gray[700];
+    }
+  };
+
+  const badgeStyle: ViewStyle = {
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: borderRadius.sm,
     alignSelf: 'flex-start',
-  },
-  default: {
-    backgroundColor: colors.gray[100],
-  },
-  success: {
-    backgroundColor: colors.success[500] + '15',
-  },
-  warning: {
-    backgroundColor: colors.warning[500] + '15',
-  },
-  error: {
-    backgroundColor: colors.error[500] + '15',
-  },
-  info: {
-    backgroundColor: colors.info[500] + '15',
-  },
-  text: {
+    backgroundColor: getBackgroundColor(),
+  };
+
+  const textStyle: TextStyle = {
     fontSize: typography.fontSize.xs,
     fontWeight: typography.fontWeight.semibold,
-  },
-  text_default: {
-    color: colors.gray[700],
-  },
-  text_success: {
-    color: colors.success[500],
-  },
-  text_warning: {
-    color: colors.warning[500],
-  },
-  text_error: {
-    color: colors.error[500],
-  },
-  text_info: {
-    color: colors.info[500],
-  },
-});
+    color: getTextColor(),
+  };
+
+  return (
+    <View style={[badgeStyle, style]}>
+      <Text style={textStyle}>{children}</Text>
+    </View>
+  );
+}

@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
 import { useCartStore } from '../features/cart/store/cartStore';
+import { ThemeProvider } from '../contexts/ThemeContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,7 +39,9 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RootLayoutContent />
+        <ThemeProvider>
+          <RootLayoutContent />
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

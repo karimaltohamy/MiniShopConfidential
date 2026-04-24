@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   Alert,
   TouchableOpacity,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,12 +17,91 @@ import { useFormik } from 'formik';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { colors, typography, spacing } from '@/theme';
+import { spacing, typography, borderRadius } from '@/theme';
 import { CustomHeader } from '@/components/navigation/CustomHeader';
 import { LoginFormValues, loginSchema } from '@/utils/validations';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function LoginScreen() {
   const { login } = useAuth();
+  const { theme } = useTheme();
+  const c = theme.colors;
+
+  const themedStyles = useMemo(
+    () => ({
+      container: {
+        flex: 1,
+        backgroundColor: c.surface,
+      } as ViewStyle,
+      keyboardView: {
+        flex: 1,
+      } as ViewStyle,
+      scrollContent: {
+        flexGrow: 1,
+        padding: spacing.lg,
+      } as ViewStyle,
+      logoContainer: {
+        alignItems: 'center',
+        marginTop: spacing.xl,
+        marginBottom: spacing.xl,
+      } as ViewStyle,
+      logoCircle: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: c.primary[100],
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: spacing.md,
+        borderWidth: 3,
+        borderColor: c.primary[200],
+      } as ViewStyle,
+      appName: {
+        fontSize: 24, // typography.fontSize['2xl']
+        fontWeight: '700' as any,
+        color: c.primary[600],
+        letterSpacing: 1,
+      } as TextStyle,
+      form: {
+        flex: 1,
+      } as ViewStyle,
+      forgotPassword: {
+        fontSize: 14, // typography.fontSize.sm
+        color: c.primary[500],
+        textAlign: 'right' as const,
+        marginBottom: spacing.lg,
+      } as TextStyle,
+      loginButton: {
+        marginTop: spacing.md,
+      } as ViewStyle,
+      demoButton: {
+        marginTop: spacing.sm,
+        paddingVertical: spacing.sm,
+        alignItems: 'center',
+      } as ViewStyle,
+      demoButtonText: {
+        fontSize: 16, // typography.fontSize.base
+        color: c.primary[500],
+        fontWeight: '500' as any,
+      } as TextStyle,
+      footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: spacing.xl,
+        paddingBottom: spacing.lg,
+      } as ViewStyle,
+      footerText: {
+        fontSize: 16, // typography.fontSize.base
+        color: c.textSecondary,
+      } as TextStyle,
+      link: {
+        fontSize: 16, // typography.fontSize.base
+        color: c.primary[500],
+        fontWeight: '600' as any,
+      } as TextStyle,
+    }),
+    [c]
+  );
 
   const initialValues: LoginFormValues = {
     email: '',
@@ -43,32 +123,21 @@ export default function LoginScreen() {
     onSubmit: handleSubmit,
   });
 
-  const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched, isSubmitting, setFieldValue } =
-    formik;
+  const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched } = formik;
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <CustomHeader
-        title="Welcome Back"
-        showBack={false}
-        subtitle="Sign in to continue shopping"
-      />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.logoContainer}>
-            <View style={styles.logoCircle}>
-              <ShoppingBag size={48} color={colors.primary[500]} />
+    <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
+      <CustomHeader title="Welcome Back" showBack={false} subtitle="Sign in to continue shopping" />
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={themedStyles.keyboardView}>
+        <ScrollView contentContainerStyle={themedStyles.scrollContent} keyboardShouldPersistTaps="handled">
+          <View style={themedStyles.logoContainer}>
+            <View style={themedStyles.logoCircle}>
+              <ShoppingBag size={48} color={c.primary[500]} />
             </View>
-            <Text style={styles.appName}>MiniShop</Text>
+            <Text style={themedStyles.appName}>MiniShop</Text>
           </View>
 
-          <View style={styles.form}>
+          <View style={themedStyles.form}>
             <Input
               label="Email"
               type="email"
@@ -91,33 +160,25 @@ export default function LoginScreen() {
             />
 
             <Link href="/(auth)/forgot-password" asChild>
-              <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              <Text style={themedStyles.forgotPassword}>Forgot Password?</Text>
             </Link>
 
-            <Button
-              onPress={() => handleSubmitForm()}
-              loading={isSubmitting}
-              fullWidth
-              style={styles.loginButton}
-            >
+            <Button onPress={() => handleSubmitForm()} loading={formik.isSubmitting} fullWidth style={themedStyles.loginButton}>
               Sign In
             </Button>
 
-            <TouchableOpacity
-              style={styles.demoButton}
-              onPress={() => {
-                setFieldValue('email', 'customer@test.com');
-                setFieldValue('password', 'Test1234!');
-                // setTimeout(() => handleSubmitForm(), 100);
-              }}
-            >
-              <Text style={styles.demoButtonText}>Try Demo Account</Text>
+            <TouchableOpacity style={themedStyles.demoButton} onPress={() => {
+              formik.setFieldValue('email', 'customer@test.com');
+              formik.setFieldValue('password', 'Test1234!');
+
+            }}>
+              <Text style={themedStyles.demoButtonText}>Try Demo Account</Text>
             </TouchableOpacity>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
+            <View style={themedStyles.footer}>
+              <Text style={themedStyles.footerText}>Don't have an account? </Text>
               <Link href="/(auth)/register" asChild>
-                <Text style={styles.link}>Sign Up</Text>
+                <Text style={themedStyles.link}>Sign Up</Text>
               </Link>
             </View>
           </View>
@@ -126,76 +187,3 @@ export default function LoginScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: spacing.lg,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginTop: spacing.xl,
-    marginBottom: spacing.xl,
-  },
-  logoCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.primary[100],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    borderWidth: 3,
-    borderColor: colors.primary[200],
-  },
-  appName: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.primary[600],
-    letterSpacing: 1,
-  },
-  form: {
-    flex: 1,
-  },
-  forgotPassword: {
-    fontSize: typography.fontSize.sm,
-    color: colors.primary[500],
-    textAlign: 'right',
-    marginBottom: spacing.lg,
-  },
-  loginButton: {
-    marginTop: spacing.md,
-  },
-  demoButton: {
-    marginTop: spacing.sm,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-  },
-  demoButtonText: {
-    fontSize: typography.fontSize.base,
-    color: colors.primary[500],
-    fontWeight: typography.fontWeight.medium,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: spacing.xl,
-    paddingBottom: spacing.lg,
-  },
-  footerText: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
-  },
-  link: {
-    fontSize: typography.fontSize.base,
-    color: colors.primary[500],
-    fontWeight: typography.fontWeight.semibold,
-  },
-});

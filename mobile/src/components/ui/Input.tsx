@@ -3,13 +3,15 @@ import {
   View,
   TextInput,
   Text,
-  StyleSheet,
   TextInputProps,
   TouchableOpacity,
   Platform,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { colors, typography, spacing, borderRadius, shadows } from '../../theme';
+import { useTheme } from '../../contexts/ThemeContext';
+import { spacing, borderRadius } from '../../theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -25,25 +27,67 @@ export function Input({
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const { theme } = useTheme();
+  const themeColors = theme.colors;
 
   const isPassword = type === 'password';
-  const keyboardType =
-    type === 'email' ? 'email-address' : 'default';
+  const keyboardType = type === 'email' ? 'email-address' : 'default';
+
+  const containerStyle: ViewStyle = { marginBottom: spacing.md };
+
+  const labelStyle: TextStyle = {
+    fontSize: 14, // using fixed size; could use typography
+    fontWeight: '500' as any,
+    color: themeColors.textPrimary,
+    marginBottom: 4,
+  };
+
+  const inputWrapperBase: ViewStyle = {
+    position: 'relative',
+    backgroundColor: themeColors.surface,
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    borderColor: themeColors.border,
+  };
+
+  const inputWrapperStyle: ViewStyle = isFocused
+    ? { ...inputWrapperBase, borderColor: themeColors.primary[500] }
+    : error
+    ? { ...inputWrapperBase, borderColor: themeColors.error[500] }
+    : inputWrapperBase;
+
+  const inputStyle: TextStyle = {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: themeColors.textPrimary,
+  };
+
+  const inputWithIconStyle: TextStyle = { paddingRight: 48 };
+
+  const iconButtonStyle: ViewStyle = {
+    position: 'absolute',
+    right: 12,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40,
+  };
+
+  const errorStyle: TextStyle = {
+    fontSize: 12,
+    color: themeColors.error[500],
+    marginTop: 4,
+  };
 
   return (
-    <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
-       <View style={[
-         styles.inputWrapper,
-         isFocused && styles.inputWrapperFocused,
-         error ? styles.inputWrapperError : undefined,
-       ]}>
+    <View style={containerStyle}>
+      {label && <Text style={labelStyle}>{label}</Text>}
+      <View style={inputWrapperStyle}>
         <TextInput
-          style={[
-            styles.input,
-            isPassword && styles.inputWithIcon,
-          ]}
-          placeholderTextColor={colors.gray[400]}
+          style={[inputStyle, isPassword && inputWithIconStyle]}
+          placeholderTextColor={themeColors.textDisabled}
           secureTextEntry={isPassword && !showPassword}
           keyboardType={keyboardType}
           autoCapitalize={type === 'email' ? 'none' : 'sentences'}
@@ -52,69 +96,16 @@ export function Input({
           {...props}
         />
         {isPassword && (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => setShowPassword(!showPassword)}
-          >
+          <TouchableOpacity style={iconButtonStyle} onPress={() => setShowPassword(!showPassword)}>
             {showPassword ? (
-              <EyeOff size={20} color={colors.gray[400]} />
+              <EyeOff size={20} color={themeColors.textSecondary} />
             ) : (
-              <Eye size={20} color={colors.gray[400]} />
+              <Eye size={20} color={themeColors.textSecondary} />
             )}
           </TouchableOpacity>
         )}
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={errorStyle}>{error}</Text>}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  inputWrapper: {
-    position: 'relative',
-    backgroundColor: '#fff',
-    borderRadius: borderRadius.md,
-    borderWidth: 1.5,
-    borderColor: colors.gray[300],
-    ...shadows.sm,
-  },
-  inputWrapperFocused: {
-    borderColor: colors.primary[500],
-    ...shadows.md,
-  },
-  inputWrapperError: {
-    borderColor: colors.error[500],
-  },
-  input: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    fontSize: typography.fontSize.base,
-    color: colors.textPrimary,
-  },
-  inputWithIcon: {
-    paddingRight: 48,
-  },
-  iconButton: {
-    position: 'absolute',
-    right: 12,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 40,
-  },
-  error: {
-    fontSize: typography.fontSize.sm,
-    color: colors.error[500],
-    marginTop: spacing.xs,
-  },
-});

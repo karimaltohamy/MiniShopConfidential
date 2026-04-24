@@ -2,7 +2,6 @@ import React from 'react';
 import {
   TouchableOpacity,
   Text,
-  StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
@@ -10,7 +9,8 @@ import {
   View,
 } from 'react-native';
 import { LucideIcon } from 'lucide-react-native';
-import { colors, typography, borderRadius, shadows, spacing } from '../../theme';
+import { useTheme } from '../../contexts/ThemeContext';
+import { borderRadius, shadows, spacing, typography } from '../../theme';
 
 interface ButtonProps {
   onPress: (e?: any) => void;
@@ -37,130 +37,121 @@ export function Button({
   rightIcon: RightIcon,
   style,
 }: ButtonProps) {
-  const buttonStyle: ViewStyle = {
-    ...styles.base,
-    ...styles[variant],
-    ...styles[`size_${size}`],
-    ...(fullWidth && styles.fullWidth),
-    ...(disabled && styles.disabled),
+  const { theme } = useTheme();
+  const themeColors = theme.colors;
+
+  const baseStyle: ViewStyle = {
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    ...shadows.sm,
   };
 
-  const textStyle: TextStyle = {
-    ...styles.text,
-    ...styles[`text_${variant}`],
-    ...styles[`textSize_${size}`],
+  const getVariantStyle = (): ViewStyle => {
+    switch (variant) {
+      case 'primary':
+        return { backgroundColor: themeColors.primary[500] };
+      case 'secondary':
+        return { backgroundColor: themeColors.gray[200] };
+      case 'outline':
+        return {
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderColor: themeColors.primary[500],
+        };
+      case 'ghost':
+        return {
+          backgroundColor: 'transparent',
+          ...Platform.select({
+            ios: { shadowOpacity: 0 },
+            android: { elevation: 0 },
+          }),
+        };
+      default:
+        return {};
+    }
+  };
+
+  const getSizeStyle = (): ViewStyle => {
+    switch (size) {
+      case 'sm':
+        return { paddingVertical: 8, paddingHorizontal: 12, minHeight: 36 };
+      case 'md':
+        return { paddingVertical: 12, paddingHorizontal: 16, minHeight: 44 };
+      case 'lg':
+        return { paddingVertical: 16, paddingHorizontal: 24, minHeight: 52 };
+      default:
+        return {};
+    }
+  };
+
+  const getTextStyle = (): TextStyle => ({
+    fontWeight: typography.fontWeight.semibold,
+    letterSpacing: 0.3,
+  });
+
+  const getTextVariantStyle = (): TextStyle => {
+    switch (variant) {
+      case 'primary':
+        return { color: '#ffffff' };
+      case 'secondary':
+        return { color: themeColors.textPrimary };
+      case 'outline':
+        return { color: themeColors.primary[500] };
+      case 'ghost':
+        return { color: themeColors.primary[500] };
+      default:
+        return {};
+    }
+  };
+
+  const getTextSizeStyle = (): TextStyle => {
+    switch (size) {
+      case 'sm':
+        return { fontSize: typography.fontSize.sm };
+      case 'md':
+        return { fontSize: typography.fontSize.base };
+      case 'lg':
+        return { fontSize: typography.fontSize.lg };
+      default:
+        return {};
+    }
+  };
+
+  const buttonStyle: ViewStyle = {
+    ...baseStyle,
+    ...getVariantStyle(),
+    ...getSizeStyle(),
+    ...(fullWidth ? { width: '100%' } : {}),
+    ...(disabled ? { opacity: 0.5 } : {}),
+    ...style,
+  };
+
+  const combinedTextStyle: TextStyle = {
+    ...getTextStyle(),
+    ...getTextVariantStyle(),
+    ...getTextSizeStyle(),
   };
 
   const isString = typeof children === 'string';
 
   return (
     <TouchableOpacity
-      style={[buttonStyle, style]}
+      style={buttonStyle}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator
-          color={variant === 'primary' ? '#fff' : colors.primary[500]}
-        />
+        <ActivityIndicator color={variant === 'primary' ? '#fff' : themeColors.primary[500]} />
       ) : (
-        <View style={styles.contentContainer}>
-          {LeftIcon && <LeftIcon size={size === 'sm' ? 14 : size === 'lg' ? 20 : 18} style={styles.leftIcon} />}
-          {isString ? <Text style={textStyle}>{children}</Text> : children}
-          {RightIcon && <RightIcon size={size === 'sm' ? 14 : size === 'lg' ? 20 : 18} style={styles.rightIcon} />}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs }}>
+          {LeftIcon && <LeftIcon size={size === 'sm' ? 14 : size === 'lg' ? 20 : 18} style={{ marginRight: spacing.xs }} />}
+          {isString ? <Text style={combinedTextStyle}>{children}</Text> : children}
+          {RightIcon && <RightIcon size={size === 'sm' ? 14 : size === 'lg' ? 20 : 18} style={{ marginLeft: spacing.xs }} />}
         </View>
       )}
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    ...shadows.sm,
-  },
-  primary: {
-    backgroundColor: colors.primary[500],
-  },
-  secondary: {
-    backgroundColor: colors.gray[100],
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: colors.primary[500],
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-    ...Platform.select({
-      ios: {
-        shadowOpacity: 0,
-      },
-      android: {
-        elevation: 0,
-      },
-    }),
-  },
-  size_sm: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    minHeight: 36,
-  },
-  size_md: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    minHeight: 44,
-  },
-  size_lg: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    minHeight: 52,
-  },
-  fullWidth: {
-    width: '100%',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  leftIcon: {
-    marginRight: spacing.xs,
-  },
-  rightIcon: {
-    marginLeft: spacing.xs,
-  },
-  text: {
-    fontWeight: typography.fontWeight.semibold,
-    letterSpacing: 0.3,
-  },
-  text_primary: {
-    color: '#fff',
-  },
-  text_secondary: {
-    color: colors.textPrimary,
-  },
-  text_outline: {
-    color: colors.primary[500],
-  },
-  text_ghost: {
-    color: colors.primary[500],
-  },
-  textSize_sm: {
-    fontSize: typography.fontSize.sm,
-  },
-  textSize_md: {
-    fontSize: typography.fontSize.base,
-  },
-  textSize_lg: {
-    fontSize: typography.fontSize.lg,
-  },
-});
