@@ -6,13 +6,11 @@ import {
   Pressable,
   ViewStyle,
   TextStyle,
-  ImageSourcePropType,
 } from 'react-native';
-import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { ChevronRight } from 'lucide-react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { spacing, borderRadius, typography } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 
 interface OrderCardProps {
   id: string;
@@ -57,19 +55,24 @@ export function OrderCard({
   const c = theme.colors;
 
   const date = new Date(created_at);
+  const isValidDate = !isNaN(date.getTime());
 
-  const formattedDate = date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const formattedDate = isValidDate
+    ? date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : 'Invalid date';
 
-  const formattedTime = date.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const formattedTime = isValidDate
+    ? date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '';
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   const formattedPrice = new Intl.NumberFormat('en-EG', {
     style: 'currency',
@@ -238,7 +241,7 @@ export function OrderCard({
           </View>
 
           <Text style={dateTimeStyle}>
-            {formattedDate} • {formattedTime}
+            {formattedDate}{formattedTime && ` • ${formattedTime}`}
           </Text>
         </View>
 
@@ -250,7 +253,7 @@ export function OrderCard({
       {/* Items Preview */}
       <View style={itemsContainerStyle}>
         <View style={itemsRowStyle}>
-          {items.slice(0, 3).map((item, index) => (
+          {items?.slice(0, 3).map((item, index) => (
             <View
               key={index}
               style={[
@@ -261,7 +264,7 @@ export function OrderCard({
               <Image
                 source={{
                   uri:
-                    item.products.image_url ||
+                    item?.products?.image_url ||
                     'https://via.placeholder.com/60/9CA3AF/FFFFFF?text=No+Image',
                 }}
                 style={{ width: '100%', height: '100%' }}
@@ -269,14 +272,14 @@ export function OrderCard({
             </View>
           ))}
 
-          {items.length > 3 && (
+          {(items?.length || 0) > 3 && (
             <View style={moreBadgeStyle}>
-              <Text style={moreTextStyle}>+{items.length - 3}</Text>
+              <Text style={moreTextStyle}>+{(items?.length || 0) - 3}</Text>
             </View>
           )}
         </View>
 
-        {items.length > 0 && (
+        {(items?.length || 0) > 0 && items?.[0]?.products?.name && (
           <Text style={itemNameStyle} numberOfLines={1}>
             {items[0].products.name}
           </Text>

@@ -43,10 +43,20 @@ apiClient.interceptors.response.use(
       data: error.response?.data,
       message: error.message,
     });
+
     if (error.response?.status === 401) {
       // Token expired, sign out user
       await supabase.auth.signOut();
     }
-    return Promise.reject(error);
+
+    // Transform error to include response data at top level for easier access
+    const transformedError = {
+      ...error,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.response?.data?.message || error.message,
+    };
+
+    return Promise.reject(transformedError);
   }
 );

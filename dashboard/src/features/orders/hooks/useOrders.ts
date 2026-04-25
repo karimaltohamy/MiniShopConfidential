@@ -7,6 +7,7 @@ export function useOrders(params?: { page?: number; limit?: number; status?: str
   return useQuery({
     queryKey: ['orders', params],
     queryFn: () => ordersApi.getOrders(params),
+    refetchOnWindowFocus: true
   });
 }
 

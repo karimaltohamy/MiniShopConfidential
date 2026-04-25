@@ -9,7 +9,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserPlus } from 'lucide-react-native';
 import { useFormik } from 'formik';
@@ -95,17 +95,23 @@ export default function RegisterScreen() {
   const handleSubmit = async (values: RegisterFormValues) => {
     try {
       await register(values);
-      Alert.alert('Success', 'Account created! Please sign in.', [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]);
+      // User is now automatically logged in, auth state change will handle navigation
     } catch (error: any) {
       console.log({ error: error });
 
       let title = 'Registration Failed';
-      let message = error.message || 'Please try again';
+      let message = error?.message || 'Please try again';
 
       const isRateLimitError = error?.status === 429 || error?.message === 'email rate limit exceeded';
       if (isRateLimitError) {
         title = 'Too Many Attempts';
         message = 'Too many registration attempts. Please wait a moment and try again.';
+      }
+
+      // Handle duplicate email error
+      if (error?.status === 400 && message.toLowerCase().includes('already been registered')) {
+        title = 'Email Already Registered';
+        message = 'This email is already registered. Please sign in or use a different email.';
       }
 
       Alert.alert(title, message);

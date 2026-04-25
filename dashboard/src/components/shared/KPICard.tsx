@@ -15,28 +15,30 @@ export default function KPICard({ title, value, change, icon: Icon, iconColor = 
   const hasChange = change !== undefined && change !== 0;
 
   return (
-    <Card>
+    <Card className="transition-all duration-200 hover:shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold">{value}</p>
+          <div className="space-y-3 flex-1">
+            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              {title}
+            </p>
+            <p className="text-3xl font-bold tracking-tight">{value}</p>
             {hasChange && (
-              <div className="flex items-center gap-1 text-sm">
+              <div className="flex items-center gap-1.5 text-sm font-medium">
                 {isPositive ? (
                   <ArrowUpIcon className="h-4 w-4 text-green-600" />
                 ) : (
                   <ArrowDownIcon className="h-4 w-4 text-red-600" />
                 )}
-                <span className={cn(isPositive ? 'text-green-600' : 'text-red-600')}>
+                <span className={cn('font-bold', isPositive ? 'text-green-600' : 'text-red-600')}>
                   {Math.abs(change)}%
                 </span>
-                <span className="text-muted-foreground">vs last month</span>
+                <span className="text-muted-foreground font-normal">vs last month</span>
               </div>
             )}
           </div>
-          <div className={cn('flex h-12 w-12 items-center justify-center rounded-full bg-primary/10', iconColor)}>
-            <Icon className="h-6 w-6" />
+          <div className={cn('flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm', iconColor)}>
+            <Icon className="h-7 w-7" />
           </div>
         </div>
       </CardContent>

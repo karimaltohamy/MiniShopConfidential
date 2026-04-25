@@ -7,29 +7,57 @@ export class AuthService {
   async register(data: RegisterInput) {
     const { name, email, password } = data;
 
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Create auth user with admin API to bypass email confirmation
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { name },
-      },
+      email_confirm: true, // Auto-confirm email
+      user_metadata: { name },
     });
 
     if (authError) {
-      throw new Error(authError.message);
+      // Handle specific Supabase error cases
+      if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
+        throw new ValidationError('An account with this email already exists');
+      }
+      if (authError.message.includes('invalid') || authError.message.includes('Invalid')) {
+        throw new ValidationError(authError.message);
+      }
+      throw new ValidationError(authError.message);
     }
 
     if (!authData.user) {
-      throw new Error('Failed to create user');
+      throw new ValidationError('Failed to create user');
     }
 
-    // Profile is auto-created via database trigger
+    // Sign in the user to get session tokens
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      throw new ValidationError('Account created but failed to sign in. Please try logging in.');
+    }
+
+    // Get user profile with role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    // Return user data and session tokens for auto-login
     return {
       user: {
         id: authData.user.id,
         email: authData.user.email,
-        name,
+        name: profile?.name || name,
+        role: profile?.role,
+      },
+      session: {
+        access_token: signInData.session?.access_token,
+        refresh_token: signInData.session?.refresh_token,
       },
     };
   }

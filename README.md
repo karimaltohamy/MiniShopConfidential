@@ -2,6 +2,15 @@
 
 A complete e-commerce system with mobile app, backend API, and admin dashboard.
 
+## 🎥 Demo Video
+
+**Watch the full walkthrough:** [Demo Video Recording](https://drive.google.com/file/d/1ml18l5J-JrYXyGsttdnQxciEp_hg7k7H/view?usp=sharing)
+
+> 4-5 minute screen recording demonstrating:
+> - Mobile app: register, browse, add to cart, checkout
+> - Admin dashboard: view order, update status
+> - Code structure and technical decisions
+
 ## Overview
 
 MiniShop is a production-ready e-commerce platform featuring:
@@ -9,6 +18,14 @@ MiniShop is a production-ready e-commerce platform featuring:
 - **Backend API** - RESTful API with authentication & real-time updates (Fastify + Node.js)
 - **Admin Dashboard** - Product and order management interface (React + Vite)
 - **Database** - PostgreSQL with Row Level Security (Supabase)
+
+## 🔑 Test Credentials
+
+Pre-configured accounts for testing:
+- **Customer Account**: customer@test.com / Test1234!
+- **Admin Account**: admin@test.com / Admin1234!
+
+> **Note**: Create these accounts in Supabase Dashboard → Authentication → Users after running the database migrations.
 
 ## Project Structure
 
@@ -299,5 +316,6 @@ npm run preview  # Preview production build
 4. Upload product images
 5. View and manage orders
 6. Update order status
+
 
 

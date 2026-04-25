@@ -73,10 +73,11 @@ export default function OrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-          <p className="mt-4 text-sm text-muted-foreground">Loading orders...</p>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="mt-6 text-base font-medium text-muted-foreground">Loading orders...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Retrieving customer orders</p>
         </div>
       </div>
     );
@@ -85,18 +86,32 @@ export default function OrdersPage() {
   const orders = ordersData?.data || [];
   const pagination = ordersData?.pagination;
 
+
+
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Orders</h1>
-        <p className="text-muted-foreground mt-2">Manage and track customer orders</p>
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage and track all customer orders
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge variant="info" className="px-3 py-1.5">
+            {pagination?.total || 0} Total Orders
+          </Badge>
+        </div>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-4">
-            <div className="w-64">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Filter by status:</span>
               <Select
                 options={statusOptions}
                 value={statusFilter}
@@ -104,8 +119,21 @@ export default function OrdersPage() {
                   setStatusFilter(e.target.value);
                   setCurrentPage(1);
                 }}
+                className="w-48"
               />
             </div>
+            {statusFilter && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setStatusFilter('');
+                  setCurrentPage(1);
+                }}
+              >
+                Clear Filter
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -113,7 +141,12 @@ export default function OrdersPage() {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Orders ({pagination?.total || 0})</CardTitle>
+          <CardTitle>
+            {statusFilter ? `${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} Orders` : 'All Orders'}
+            <span className="ml-2 text-base font-normal text-muted-foreground">
+              ({orders.length})
+            </span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {orders.length === 0 ? (
@@ -122,70 +155,94 @@ export default function OrdersPage() {
               title="No orders found"
               description={
                 statusFilter
-                  ? 'No orders match the selected filter'
-                  : 'Orders will appear here when customers make purchases'
+                  ? 'Try adjusting your filters to see more orders'
+                  : 'Orders will appear here when customers make purchases from your store'
               }
             />
           ) : (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-mono text-sm">
-                        {order.id.slice(0, 8)}...
-                      </TableCell>
-                       <TableCell>{order.profiles?.name || 'N/A'}</TableCell>
-                      <TableCell>{order.order_items?.length || 0}</TableCell>
-                      <TableCell className="font-medium">
-                        {formatCurrency(order.total_amount)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariants[order.status]}>
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {formatDateTime(order.created_at)}
-                      </TableCell>
-                       <TableCell className="text-right">
-                         <div className="flex justify-end gap-2">
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => openDetailsDialog(order)}
-                             leftIcon={<Eye className="h-4 w-4" />}
-                           >
-                             View
-                           </Button>
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => openStatusDialog(order)}
-                             leftIcon={<RefreshCw className="h-4 w-4" />}
-                           >
-                             Update Status
-                           </Button>
-                         </div>
-                       </TableCell>
+              <div className="overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-32">Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead className="w-20">Items</TableHead>
+                      <TableHead className="w-32">Total</TableHead>
+                      <TableHead className="w-28">Status</TableHead>
+                      <TableHead className="w-64 text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map((order) => (
+                      <TableRow key={order.id} className="transition-colors hover:bg-muted/50">
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-mono text-xs font-medium">
+                              {order.id.slice(0, 8)}...
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                              <span className="text-sm font-semibold text-primary">
+                                {(order.profiles?.name || 'U')[0].toUpperCase()}
+                              </span>
+                            </div>
+                            <span className="font-medium">{order.profiles?.name || 'N/A'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm font-medium">
+                            {order.order_items?.length || 0}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-lg font-bold">
+                            {formatCurrency(order.total_amount)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariants[order.status]}>
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        {/* <TableCell>
+                          <span className="text-sm text-muted-foreground">
+                            {formatDateTime(order.created_at)}
+                          </span>
+                        </TableCell> */}
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openDetailsDialog(order)}
+                              leftIcon={<Eye className="h-4 w-4" />}
+                              className='p-0'
+                            >
+                              View
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openStatusDialog(order)}
+                              leftIcon={<RefreshCw className="h-4 w-4" />}
+                              className='p-0'
+                            >
+                              Update
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               {pagination && pagination.totalPages > 1 && (
-                <div className="mt-6">
+                <div className="mt-6 flex justify-center">
                   <Pagination
                     currentPage={pagination.page}
                     totalPages={pagination.totalPages}

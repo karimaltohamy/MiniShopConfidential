@@ -95,21 +95,25 @@ export default function ProductsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-          <p className="mt-4 text-sm text-muted-foreground">Loading products...</p>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="mt-6 text-base font-medium text-muted-foreground">Loading products...</p>
+          <p className="mt-2 text-sm text-muted-foreground">Fetching your product catalog</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Products</h1>
-          <p className="text-muted-foreground mt-2">Manage your product catalog</p>
+          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage your product catalog and inventory
+          </p>
         </div>
         <Button onClick={openCreateDialog} leftIcon={<Plus className="h-4 w-4" />}>
           Add Product
@@ -119,18 +123,19 @@ export default function ProductsPage() {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex-1">
               <Input
-                placeholder="Search products..."
+                placeholder="Search products by name..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
+                className="w-full"
               />
             </div>
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <Select
                 options={categoryOptions}
                 value={selectedCategoryId}
@@ -147,7 +152,14 @@ export default function ProductsPage() {
       {/* Products Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Products ({productsData?.data?.length || 0})</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              All Products
+              <span className="ml-2 text-base font-normal text-muted-foreground">
+                ({productsData?.pagination?.total || 0})
+              </span>
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {!productsData?.data || productsData.data.length === 0 ? (
@@ -159,74 +171,93 @@ export default function ProductsPage() {
               onAction={openCreateDialog}
             />
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Image</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {productsData.data.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      {product.image_url ? (
-                        <img
-                          src={product.image_url}
-                          alt={product.name}
-                          className="h-12 w-12 rounded object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
-                          <Package className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product?.category?.name || 'N/A'}</TableCell>
-                    <TableCell>{formatCurrency(product.price)}</TableCell>
-                    <TableCell>{product.stock}</TableCell>
-                    <TableCell>
-                      <Badge variant={product.is_active ? 'success' : 'error'}>
-                        {product.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEditDialog(product)}
-                          leftIcon={<Pencil className="h-4 w-4" />}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(product.id)}
-                          leftIcon={<Trash2 className="h-4 w-4" />}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-20">Image</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead className="w-24">Stock</TableHead>
+                    <TableHead className="w-28">Status</TableHead>
+                    <TableHead className="w-48 text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {productsData.data.map((product) => (
+                    <TableRow key={product.id} className="transition-colors hover:bg-muted/50">
+                      <TableCell>
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="h-14 w-14 rounded-lg border object-cover shadow-sm"
+                          />
+                        ) : (
+                          <div className="flex h-14 w-14 items-center justify-center rounded-lg border bg-muted">
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-semibold">{product.name}</span>
+                          {product.description && (
+                            <span className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                              {product.description}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{product?.category?.name || 'N/A'}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-semibold">{formatCurrency(product.price)}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={product.stock < 10 ? 'text-destructive font-semibold' : ''}>
+                          {product.stock}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={product.is_active ? 'success' : 'error'}>
+                          {product.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(product)}
+                            leftIcon={<Pencil className="h-4 w-4" />}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(product.id)}
+                            leftIcon={<Trash2 className="h-4 w-4 text-destructive" />}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
 
       {/* Pagination */}
       {productsData?.pagination && productsData.pagination.totalPages > 1 && (
-        <div className="mt-6">
+        <div className="flex justify-center">
           <Pagination
             currentPage={productsData.pagination.page}
             totalPages={productsData.pagination.totalPages}

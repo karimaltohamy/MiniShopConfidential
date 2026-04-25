@@ -34,6 +34,8 @@ export default function CheckoutScreen() {
       } as TextStyle,
       orderSummary: {
         marginBottom: spacing.lg,
+        borderWidth: 1,
+        borderColor: c.border,
       } as ViewStyle,
       orderItem: {
         flexDirection: 'row',
@@ -138,7 +140,7 @@ export default function CheckoutScreen() {
   if (orderPlaced) {
     return (
       <SafeAreaView style={themedStyles.container}>
-        <CustomHeader title="Checkout" showBack={false} />
+        {/* <CustomHeader title="Checkout" showBack={false} /> */}
         <View style={themedStyles.successContainer}>
           <CheckCircle size={80} color={c.success[500]} />
           <Text style={themedStyles.successTitle}>Order Placed!</Text>
@@ -148,7 +150,7 @@ export default function CheckoutScreen() {
           <Button onPress={() => router.replace('/(tabs)/orders')} fullWidth style={themedStyles.successButton}>
             View Orders
           </Button>
-          <Button onPress={() => router.replace('/(tabs)/')} variant="outline" fullWidth>
+          <Button onPress={() => router.replace('/(tabs)')} variant="outline" fullWidth>
             Continue Shopping
           </Button>
         </View>
@@ -171,7 +173,7 @@ export default function CheckoutScreen() {
                 </Text>
                 <Text style={themedStyles.itemQuantity}>Qty: {item.quantity}</Text>
               </View>
-               <Text style={themedStyles.itemPrice}>${(item.price * item.quantity).toFixed(2)}</Text>
+              <Text style={themedStyles.itemPrice}>${(item.price * item.quantity).toFixed(2)}</Text>
             </View>
           ))}
 

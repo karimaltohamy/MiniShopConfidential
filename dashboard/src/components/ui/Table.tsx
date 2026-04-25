@@ -47,7 +47,7 @@ const TableHead = forwardRef<HTMLTableCellElement, ThHTMLAttributes<HTMLTableCel
     <th
       ref={ref}
       className={cn(
-        'h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
+        'h-14 px-4 text-left align-middle font-semibold text-muted-foreground [&:has([role=checkbox])]:pr-0 uppercase text-xs tracking-wider',
         className
       )}
       {...props}
@@ -58,7 +58,7 @@ TableHead.displayName = 'TableHead';
 
 const TableCell = forwardRef<HTMLTableCellElement, TdHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <td ref={ref} className={cn('p-4 align-middle [&:has([role=checkbox])]:pr-0', className)} {...props} />
+    <td ref={ref} className={cn('px-4 py-4 align-middle [&:has([role=checkbox])]:pr-0', className)} {...props} />
   )
 );
 TableCell.displayName = 'TableCell';

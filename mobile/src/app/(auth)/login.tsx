@@ -113,7 +113,8 @@ export default function LoginScreen() {
       await login(values);
       router.replace('/(tabs)');
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'Invalid email or password');
+      const message = error?.message || 'Invalid email or password';
+      Alert.alert('Login Failed', message);
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
 import { useCartStore } from '../features/cart/store/cartStore';
@@ -16,8 +16,10 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutContent() {
-  const { loading } = useAuth();
+  const { user, loading } = useAuth();
   const loadCart = useCartStore((state) => state.loadCart);
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
     loadCart();
@@ -29,6 +31,21 @@ function RootLayoutContent() {
     const cleanup = initializeDeepLinking();
     return cleanup;
   }, []);
+
+  // Handle navigation based on auth state
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!user && !inAuthGroup) {
+      // Redirect unauthenticated users to login
+      router.replace('/(auth)/login');
+    } else if (user && inAuthGroup) {
+      // Redirect authenticated users to home
+      router.replace('/(tabs)');
+    }
+  }, [user, segments, loading]);
 
   if (loading) {
     return null; // Or a loading screen

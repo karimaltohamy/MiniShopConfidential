@@ -71,7 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
-    await authApi.register(data);
+    const response = await authApi.register(data);
+    // Set Supabase session with tokens from backend to auto-login
+    if (response?.session) {
+      await supabase.auth.setSession({
+        access_token: response.session.access_token,
+        refresh_token: response.session.refresh_token,
+      });
+    }
   };
 
   const login = async (data: LoginData) => {
