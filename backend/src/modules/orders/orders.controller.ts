@@ -23,14 +23,23 @@ export class OrdersController {
     return reply.code(201).send(order);
   }
 
-  async getMyOrders(req: FastifyRequest, reply: FastifyReply) {
-    if (!req.user) {
-      return reply.code(401).send({ error: 'Unauthorized' });
-    }
+   async getMyOrders(req: FastifyRequest, reply: FastifyReply) {
+     if (!req.user) {
+       return reply.code(401).send({ error: 'Unauthorized' });
+     }
 
-    const orders = await this.ordersService.getMyOrders(req.user.id);
-    return reply.send(orders);
-  }
+     const orders = await this.ordersService.getMyOrders(req.user.id);
+     return reply.send(orders);
+   }
+
+   async getOrderById(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+     if (!req.user) {
+       return reply.code(401).send({ error: 'Unauthorized' });
+     }
+
+     const order = await this.ordersService.getOrderByIdForUser(req.user.id, req.params.id);
+     return reply.send(order);
+   }
 
   async getAllOrders(req: FastifyRequest, reply: FastifyReply) {
     const query = orderQuerySchema.parse(req.query);

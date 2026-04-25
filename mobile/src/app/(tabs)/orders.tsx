@@ -12,6 +12,7 @@ import { CustomHeader } from '@/components/navigation/CustomHeader';
 import { useOrdersRealtime } from '../../features/orders/hooks/useOrdersRealtime';
 import { useNetworkSync } from '../../features/orders/hooks/useNetworkSync';
 import { useTheme } from '../../contexts/ThemeContext';
+import { router } from 'expo-router';
 
 export default function OrdersScreen() {
   const { theme } = useTheme();
@@ -90,9 +91,7 @@ export default function OrdersScreen() {
             total_amount={item.total_amount}
             created_at={item.created_at}
             items={item.order_items}
-            onPress={() => {
-              // Navigate to order detail if implemented
-            }}
+            onPress={() => router.push(`/(tabs)/orders/${item.id}`)}
           />
         )}
         keyExtractor={(item) => item.id}

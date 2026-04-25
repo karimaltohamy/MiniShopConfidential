@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Tabs, Redirect } from 'expo-router';
-import { ShoppingBag, ShoppingCart, Package, User } from 'lucide-react-native';
+import { Package, ShoppingBag, ShoppingCart, User } from 'lucide-react-native';
 import { View, Text, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useAuth } from '../../features/auth/hooks/useAuth';
@@ -113,6 +113,14 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="orders/[id]"
+        options={{
+          href: null
+        }}
+      />
+
       <Tabs.Screen
         name="profile"
         options={{

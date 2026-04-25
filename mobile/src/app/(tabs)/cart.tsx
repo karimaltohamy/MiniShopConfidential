@@ -91,7 +91,7 @@ export default function CartScreen() {
           title="Your cart is empty"
           description="Add some products to get started"
           actionLabel="Start Shopping"
-          onAction={() => router.push('/(tabs)/')}
+          onAction={() => router.push('/(tabs)')}
         />
       </SafeAreaView>
     );

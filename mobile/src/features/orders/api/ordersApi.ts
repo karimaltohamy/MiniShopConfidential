@@ -39,4 +39,9 @@ export const ordersApi = {
     const { data } = await apiClient.get<Order[]>('/orders/my');
     return data;
   },
+
+  async getOrderById(id: string) {
+    const { data } = await apiClient.get<Order>(`/orders/${id}`);
+    return data;
+  },
 };

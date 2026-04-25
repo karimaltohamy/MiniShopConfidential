@@ -4,7 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { borderRadius, typography } from '../../theme';
 
 interface BadgeProps {
-  children: string;
+  children: React.ReactNode;
   variant?: 'default' | 'success' | 'warning' | 'error' | 'info';
   style?: ViewStyle;
 }
@@ -57,9 +57,9 @@ export function Badge({ children, variant = 'default', style }: BadgeProps) {
     color: getTextColor(),
   };
 
-  return (
-    <View style={[badgeStyle, style]}>
-      <Text style={textStyle}>{children}</Text>
-    </View>
-  );
-}
+   return (
+     <View style={[badgeStyle, style]}>
+       {typeof children === 'string' ? <Text style={textStyle}>{children}</Text> : children}
+     </View>
+   );
+ };

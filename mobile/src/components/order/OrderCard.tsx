@@ -216,7 +216,7 @@ export function OrderCard({
   };
 
   const chevronWrapperStyle: ViewStyle = {
-    backgroundColor: c.gray[100],
+    backgroundColor: c.surfaceVariant,
     padding: 8,
     borderRadius: borderRadius.full,
   };

@@ -8,20 +8,18 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFormik } from 'formik';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { spacing, typography, borderRadius } from '@/theme';
+import { spacing, typography } from '@/theme';
 import { CustomHeader } from '@/components/navigation/CustomHeader';
 import { ResetPasswordFormValues, resetPasswordSchema } from '@/utils/validations';
-import * as Linking from 'expo-linking';
+import { supabase } from '@/lib/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function ResetPasswordScreen() {
-  const { resetPassword } = useAuth();
   const { theme } = useTheme();
   const c = theme.colors;
 
@@ -61,7 +59,7 @@ export default function ResetPasswordScreen() {
     [c]
   );
 
-  const [token, setToken] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -70,46 +68,59 @@ export default function ResetPasswordScreen() {
     confirmPassword: '',
   };
 
-  // Extract token from deep link URL on mount
+  // Verify that the user has a valid session (restored by deep link handler)
   useEffect(() => {
-    const handleUrl = (event: { url: string }) => {
-      const { queryParams } = Linking.parse(event.url);
-      const extractedToken = (queryParams?.token ?? queryParams?.access_token) as string | null;
-      if (extractedToken) {
-        setToken(extractedToken);
-        setErrorMsg(null);
-      } else {
-        setErrorMsg('Invalid reset link: missing token');
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error || !session) {
+          setErrorMsg('Invalid or expired reset link. Please request a new one.');
+          setIsVerifying(false);
+          return;
+        }
+
+        // Session is valid, user can proceed to reset password
+        console.log('Session verified for password reset');
+        setIsVerifying(false);
+      } catch (error) {
+        console.error('Error verifying session:', error);
+        setErrorMsg('Failed to verify reset link. Please try again.');
+        setIsVerifying(false);
       }
     };
 
-    // Check initial URL (app cold start)
-    (async () => {
-      const initialUrl = await Linking.getInitialURL();
-      if (initialUrl) {
-        handleUrl({ url: initialUrl });
-      }
-    })();
-
-    // Listen for URLs when app is warm started
-    const subscription = Linking.addEventListener('url', handleUrl);
-
-    return () => subscription.remove();
+    checkSession();
   }, []);
 
   const handleSubmit = async (values: ResetPasswordFormValues) => {
-    if (!token) {
-      Alert.alert('Error', 'Reset token is missing. Please request a new reset link.');
-      return;
-    }
-
     setSubmitting(true);
     try {
-      await resetPassword({ token, password: values.password });
-      Alert.alert('Success', 'Password updated successfully! Please sign in.', [
-        { text: 'OK', onPress: () => router.replace('/(auth)/login') },
-      ]);
+      // Update password using Supabase's updateUser method
+      const { error } = await supabase.auth.updateUser({
+        password: values.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      Alert.alert(
+        'Success',
+        'Password updated successfully! Please sign in with your new password.',
+        [
+          {
+            text: 'OK',
+            onPress: async () => {
+              // Sign out and redirect to login
+              await supabase.auth.signOut();
+              router.replace('/(auth)/login');
+            },
+          },
+        ]
+      );
     } catch (error: any) {
+      console.error('Password reset error:', error);
       Alert.alert('Error', error.message || 'Failed to reset password. Please try again.');
     } finally {
       setSubmitting(false);
@@ -124,8 +135,8 @@ export default function ResetPasswordScreen() {
 
   const { handleChange, handleBlur, handleSubmit: handleSubmitForm, values, errors, touched } = formik;
 
-  // Loading state while extracting token
-  if (!token && !errorMsg) {
+  // Loading state while verifying session
+  if (isVerifying) {
     return (
       <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
         <CustomHeader title="Verifying Link" showBack subtitle="" />
@@ -137,13 +148,19 @@ export default function ResetPasswordScreen() {
     );
   }
 
-  // Error state if token missing or invalid
+  // Error state if session is invalid or expired
   if (errorMsg) {
     return (
       <SafeAreaView style={themedStyles.container} edges={['left', 'right', 'bottom']}>
         <CustomHeader title="Error" showBack />
         <View style={themedStyles.loadingContainer}>
           <Text style={themedStyles.errorText}>{errorMsg}</Text>
+          <Button
+            onPress={() => router.replace('/(auth)/forgot-password')}
+            style={{ marginTop: spacing.lg }}
+          >
+            Request New Reset Link
+          </Button>
         </View>
       </SafeAreaView>
     );

@@ -72,6 +72,34 @@ export class OrdersService {
     return order;
   }
 
+  async getOrderByIdForUser(userId: string, orderId: string) {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          *,
+          products (
+            id,
+            name,
+            image_url
+          )
+        )
+      `)
+      .eq('id', orderId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        throw new NotFoundError('Order not found');
+      }
+      throw error;
+    }
+
+    return order;
+  }
+
   async getMyOrders(userId: string) {
     const { data, error } = await supabase
       .from('orders')

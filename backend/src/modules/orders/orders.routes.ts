@@ -11,12 +11,17 @@ export default async function ordersRoutes(app: FastifyInstance) {
     handler: controller.createOrder.bind(controller),
   });
 
-  app.get('/my', {
-    preHandler: [requireAuth],
-    handler: controller.getMyOrders.bind(controller),
-  });
+   app.get('/my', {
+     preHandler: [requireAuth],
+     handler: controller.getMyOrders.bind(controller),
+   });
 
-  // Admin routes
+   app.get('/:id', {
+     preHandler: [requireAuth],
+     handler: controller.getOrderById.bind(controller),
+   });
+
+   // Admin routes
   app.get('/', {
     preHandler: [requireAuth, requireAdmin],
     handler: controller.getAllOrders.bind(controller),

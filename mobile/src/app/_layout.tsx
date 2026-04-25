@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
 import { useCartStore } from '../features/cart/store/cartStore';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { initializeDeepLinking } from '../lib/deepLinking';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +23,13 @@ function RootLayoutContent() {
     loadCart();
   }, []);
 
+  // Initialize deep linking for Supabase auth flows
+  useEffect(() => {
+    console.log('Initializing deep link handler...');
+    const cleanup = initializeDeepLinking();
+    return cleanup;
+  }, []);
+
   if (loading) {
     return null; // Or a loading screen
   }
@@ -29,6 +37,10 @@ function RootLayoutContent() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(auth)/login" />
+      <Stack.Screen name="(auth)/register" />
+      <Stack.Screen name="(auth)/forgot-password" />
+      <Stack.Screen name="(auth)/reset-password" />
       <Stack.Screen name="product/[id]" options={{ presentation: 'card' }} />
       <Stack.Screen name="checkout" options={{ presentation: 'card' }} />
     </Stack>

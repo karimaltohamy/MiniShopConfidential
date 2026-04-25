@@ -22,7 +22,7 @@ import { spacing, borderRadius, typography } from '../../theme';
 import { CustomHeader } from '@/components/navigation/CustomHeader';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 4;
 
 export default function ShopScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -150,8 +150,8 @@ export default function ShopScreen() {
       productsApi.getProducts({
         search: searchQuery || undefined,
         category_id: selectedCategory || undefined,
-        page: pageParam as number,
-        limit: PAGE_SIZE,
+        page: String(pageParam),
+        limit: String(PAGE_SIZE),
       }),
     getNextPageParam: (lastPage, allPages) => {
       const totalPages = lastPage.pagination.totalPages;

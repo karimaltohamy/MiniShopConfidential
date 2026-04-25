@@ -76,9 +76,11 @@ export function CartItem({
   const quantityControlStyle: ViewStyle = {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: c.gray[200],
+    backgroundColor: c.background,
     borderRadius: borderRadius.md,
     padding: 4,
+    borderWidth: 1,
+    borderColor: c.border
   };
 
   const quantityButtonStyle: ViewStyle = {

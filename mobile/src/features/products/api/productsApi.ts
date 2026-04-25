@@ -8,7 +8,15 @@ export interface Product {
   image_url?: string;
   category_id: string;
   is_active: boolean;
+  stock: number;
+  created_at: string;
+  updated_at: string;
   categories?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  category?: {
     id: string;
     name: string;
     slug: string;
@@ -38,7 +46,7 @@ export interface PaginatedResponse<T> {
 }
 
 export const productsApi = {
-  async getProducts(params?: { search?: string; category_id?: string; page?: number; limit?: number }) {
+  async getProducts(params?: { search?: string; category_id?: string; page?: string; limit?: string }) {
     console.log('productsApi.getProducts called with params:', params);
     try {
       const response = await apiClient.get<PaginatedResponse<Product>>('/products', { params });
