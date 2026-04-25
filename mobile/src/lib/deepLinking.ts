@@ -100,38 +100,70 @@ export class DeepLinkHandler {
 
   /**
    * Handle Supabase authentication URLs (password reset, email verification)
-   * Uses Supabase's getSessionFromUrl to restore session from URL
+   * Manually extracts tokens from URL hash and restores session
    */
   private async handleSupabaseAuth(url: string) {
     try {
-      console.log('Handling Supabase auth URL...');
+      console.log('Handling Supabase auth URL:', url);
 
-      // Extract session from URL (handles hash-based tokens)
-      const { data, error } = await supabase.auth.getSessionFromUrl({ url });
-
-      if (error) {
-        console.error('Supabase auth error:', error);
-        this.handleAuthError(error.message);
+      // Extract hash fragment from URL (Supabase tokens are in the hash)
+      const hashIndex = url.indexOf('#');
+      if (hashIndex === -1) {
+        console.error('No hash fragment found in URL');
+        this.handleAuthError('Invalid authentication link');
         return;
       }
 
-      if (data.session) {
-        console.log('Session restored successfully');
+      const hashFragment = url.substring(hashIndex + 1);
+      const params = new URLSearchParams(hashFragment);
 
-        // Determine the auth action type
-        const { pathname } = new URL(url);
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      const error_description = params.get('error_description');
+      const error_code = params.get('error');
 
-        // Navigate to appropriate screen based on the URL path
-        if (pathname.includes('reset-password')) {
-          console.log('Navigating to reset password screen...');
-          router.replace('/(auth)/reset-password');
-        } else {
-          // Default: navigate to app home after successful auth
-          console.log('Navigating to home screen...');
-          router.replace('/(tabs)');
+      // Handle error case
+      if (error_code || error_description) {
+        console.error('Auth error from URL:', error_description || error_code);
+        this.handleAuthError(error_description || 'Authentication failed');
+        return;
+      }
+
+      // Handle success case
+      if (access_token && refresh_token) {
+        console.log('Setting session from tokens...');
+
+        // Set the session using the tokens
+        const { data, error } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+
+        if (error) {
+          console.error('Error setting session:', error);
+          this.handleAuthError(error.message);
+          return;
+        }
+
+        if (data.session) {
+          console.log('Session restored successfully');
+
+          // Parse URL path using Expo Linking (works with custom schemes)
+          const { path } = Linking.parse(url);
+
+          // Navigate to appropriate screen based on the URL path
+          if (path?.includes('reset-password') || url.includes('reset-password')) {
+            console.log('Navigating to reset password screen...');
+            router.replace('/(auth)/reset-password');
+          } else {
+            // Default: navigate to app home after successful auth
+            console.log('Navigating to home screen...');
+            router.replace('/(tabs)');
+          }
         }
       } else {
-        console.warn('No session found in URL');
+        console.warn('No tokens found in URL');
+        this.handleAuthError('Invalid authentication link');
       }
     } catch (error) {
       console.error('Error handling Supabase auth:', error);

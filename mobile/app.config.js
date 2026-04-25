@@ -9,6 +9,7 @@ export default {
       EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
     },
     ios: {
+      ...require('./app.json').expo.ios,
       infoPlist: {
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: true,
