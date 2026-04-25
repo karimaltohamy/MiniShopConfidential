@@ -1,188 +1,93 @@
 # MiniShop Admin Dashboard
 
-A modern, responsive admin dashboard for managing the MiniShop e-commerce platform.
-
-## Features
-
-- **Authentication**: Secure admin login with role-based access control
-- **Dashboard**: Overview with KPIs and recent orders
-- **Products Management**: Full CRUD operations for products
-  - Create, edit, and delete products
-  - Image upload to Supabase Storage
-  - Category filtering and search
-  - Stock management
-- **Orders Management**: Track and manage customer orders
-  - View order details
-  - Update order status
-  - Filter by status
-  - Pagination support
+Web-based admin dashboard for managing the MiniShop e-commerce platform.
 
 ## Tech Stack
 
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
+- **React 18** - UI library
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool & dev server
 - **React Router** - Client-side routing
-- **TanStack Query** - Data fetching and caching
-- **React Hook Form + Zod** - Form handling and validation
-- **Tailwind CSS** - Styling
-- **Supabase** - Authentication and storage
+- **TanStack Query** - Server state management
+- **React Hook Form** - Form handling
+- **Zod** - Schema validation
+- **Tailwind CSS** - Utility-first styling
+- **Supabase** - Authentication & storage
 - **Axios** - HTTP client
-- **Sonner** - Toast notifications
-- **Lucide React** - Icons
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- Backend API running on port 3000
-- Supabase project with:
-  - Authentication enabled
-  - Product images storage bucket created
-  - RLS policies configured
-
-### Installation
-
-1. Install dependencies:
-
-```bash
-npm install
-```
-
-2. Create environment file:
-
-```bash
-cp .env.example .env
-```
-
-3. Configure environment variables in `.env`:
-
-```env
-VITE_API_URL=http://localhost:3000
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-here
-```
-
-4. Start the development server:
-
-```bash
-npm run dev
-```
-
-The dashboard will be available at [http://localhost:5173](http://localhost:5173)
-
-## Build for Production
-
-```bash
-npm run build
-```
-
-The built files will be in the `dist` directory.
+- **Recharts** - Charts and visualizations
 
 ## Project Structure
 
 ```
 dashboard/
 ├── src/
-│   ├── app/              # App setup and routing
-│   │   ├── App.tsx       # Main app component with providers
-│   │   └── router.tsx    # Route configuration
-│   ├── components/
-│   │   ├── layout/       # Layout components
-│   │   │   ├── Sidebar.tsx
-│   │   │   ├── Header.tsx
-│   │   │   └── MainLayout.tsx
-│   │   ├── shared/       # Shared components
-│   │   │   ├── KPICard.tsx
-│   │   │   ├── Pagination.tsx
-│   │   │   ├── EmptyState.tsx
-│   │   │   └── ImageUpload.tsx
-│   │   └── ui/           # Base UI components
-│   │       ├── Button.tsx
-│   │       ├── Input.tsx
-│   │       ├── Card.tsx
-│   │       ├── Badge.tsx
-│   │       ├── Table.tsx
-│   │       ├── Dialog.tsx
-│   │       ├── Select.tsx
-│   │       └── Textarea.tsx
-│   ├── features/         # Feature modules
-│   │   ├── auth/
-│   │   │   ├── api/      # Auth API calls
-│   │   │   ├── hooks/    # Auth hooks and context
-│   │   │   └── components/ # Protected route
-│   │   ├── products/
-│   │   │   ├── api/      # Products API calls
-│   │   │   └── hooks/    # Products React Query hooks
-│   │   └── orders/
-│   │       ├── api/      # Orders API calls
-│   │       └── hooks/    # Orders React Query hooks
-│   ├── pages/            # Page components
-│   │   ├── auth/
-│   │   │   └── LoginPage.tsx
-│   │   ├── dashboard/
-│   │   │   └── DashboardPage.tsx
-│   │   ├── products/
-│   │   │   └── ProductsPage.tsx
-│   │   └── orders/
-│   │       └── OrdersPage.tsx
-│   ├── lib/              # Utilities and configs
-│   │   ├── api.ts        # Axios client setup
-│   │   ├── supabase.ts   # Supabase client
-│   │   └── utils.ts      # Helper functions
-│   ├── types/            # TypeScript types
-│   │   └── index.ts
-│   ├── index.css         # Global styles
-│   ├── main.tsx          # App entry point
-│   └── vite-env.d.ts     # Vite types
-├── public/               # Static assets
-├── .env.example          # Environment variables template
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-├── vite.config.ts
-└── README.md
+│   ├── app/                      # App configuration
+│   │   ├── App.tsx              # Main app with providers
+│   │   └── router.tsx           # Route configuration
+│   ├── pages/                   # Page components
+│   │   ├── auth/               # Login page
+│   │   ├── dashboard/          # Dashboard overview
+│   │   ├── products/           # Products management
+│   │   └── orders/             # Orders management
+│   ├── components/              # Reusable components
+│   │   ├── layout/             # Layout components (Sidebar, Header)
+│   │   ├── shared/             # Shared components (KPIs, Pagination)
+│   │   └── ui/                 # UI primitives (Button, Input, Card, etc.)
+│   ├── features/                # Feature modules
+│   │   ├── auth/               # Auth context & API
+│   │   ├── products/           # Products API & hooks
+│   │   └── orders/             # Orders API & hooks
+│   ├── lib/                     # Core utilities
+│   │   ├── api.ts              # Axios client with interceptors
+│   │   ├── supabase.ts         # Supabase client
+│   │   └── utils.ts            # Helper functions
+│   ├── types/                   # TypeScript types
+│   ├── hooks/                   # Custom React hooks
+│   └── main.tsx                # App entry point
+├── public/                      # Static assets
+└── package.json
 ```
 
-## Default Credentials
+## Features
 
-For development and testing:
+- Admin authentication with role-based access
+- Dashboard with KPIs and analytics
+- Product management (CRUD operations)
+  - Image upload to Supabase Storage
+  - Category filtering and search
+  - Stock management
+- Order management
+  - View order details
+  - Update order status
+  - Real-time updates
+  - Pagination & filtering
+- Dark mode support
 
-- **Email**: admin@example.com
-- **Password**: admin123
+## Getting Started
 
-**Note**: Make sure to create an admin user in your database with these credentials or update them accordingly.
+### 1. Install Dependencies
 
-## Key Features Explained
+```bash
+npm install
+```
 
-### Authentication
+### 2. Environment Setup
 
-- Admin-only access with role verification
-- JWT token management via Supabase Auth
-- Automatic token refresh
-- Protected routes with redirect to login
+Create a `.env` file:
 
-### Product Management
+```env
+VITE_API_URL=http://localhost:3000
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-- Image upload to Supabase Storage bucket `product-images`
-- Real-time search and category filtering
-- Form validation with Zod schemas
-- Optimistic UI updates with React Query
+### 3. Run Development Server
 
-### Order Management
+```bash
+npm run dev
+```
 
-- Paginated order listing
-- Status filtering
-- Order details modal
-- Status update workflow
-- Real-time data synchronization
-
-### Dashboard
-
-- Revenue and orders KPIs with month-over-month changes
-- Recent orders table
-- Quick access to key metrics
+Dashboard runs on `http://localhost:5173`
 
 ## Available Scripts
 
@@ -191,31 +96,63 @@ For development and testing:
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
-## Environment Variables
+## Default Admin Credentials
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_API_URL` | Backend API URL | `http://localhost:3000` |
-| `VITE_SUPABASE_URL` | Supabase project URL | `https://xxx.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
+Test credentials:
+- **Email**: admin@test.com
+- **Password**: Admin1234!
+
+## Key Features
+
+### Dashboard Overview
+- Total revenue & orders metrics
+- Month-over-month changes
+- Recent orders table
+- Quick actions
+
+### Product Management
+- Create, edit, delete products
+- Upload product images
+- Category assignment
+- Stock tracking
+- Search & filter
+
+### Order Management
+- View all orders with pagination
+- Filter by status (pending, processing, completed, cancelled)
+- Update order status
+- View order details & items
+- Real-time order updates
 
 ## Supabase Storage Setup
 
-Create a storage bucket for product images:
+For product images, create a storage bucket:
 
-1. Go to Supabase Dashboard → Storage
-2. Create a new bucket named `product-images`
-3. Set it to **public** for easy access
-4. Configure RLS policies if needed
+1. Supabase Dashboard → Storage
+2. Create bucket: `product-images`
+3. Set to **public**
+4. Configure RLS policies as needed
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | Backend API URL |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
+
+## Build for Production
+
+```bash
+npm run build
+```
+
+Output in `dist/` directory.
 
 ## Notes
 
-- All API calls automatically include the JWT token from Supabase Auth
-- Form validation uses Zod schemas for type-safe validation
-- React Query handles caching and automatic refetching
-- Toast notifications (via Sonner) for user feedback
-- Responsive design works on desktop and tablet
-
-## Support
-
-For issues or questions, please refer to the main project documentation.
+- JWT tokens managed automatically via Supabase Auth
+- React Query handles caching and refetching
+- Form validation with Zod schemas
+- Toast notifications for user feedback
+- Responsive design (desktop & tablet)
